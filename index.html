@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#f6c453" />
-  <title>사르르목장 · 똥피하기</title>
-  <meta name="description" content="사르르목장 미니게임 — 떨어지는 똥을 피하고 우유를 모으세요!" />
+  <meta name="theme-color" content="#385088" />
+  <title>사르르목장 · 젖소 똥피하기</title>
+  <meta name="description" content="사르르목장 미니게임 — 우리 젖소가 소똥을 피하고 우유·아이스크림을 모아요!" />
+  <link rel="icon" href="./assets/logo.png" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./css/style.css" />
@@ -13,11 +14,7 @@
 <body>
   <div id="app">
     <header class="topbar">
-      <div class="brand">
-        <span class="brand-emoji">🐄</span>
-        <span class="brand-text">사르르목장</span>
-      </div>
-      <div class="game-title">똥피하기</div>
+      <img class="brand-logo" src="./assets/logo.png" alt="사르르목장" />
     </header>
 
     <main class="stage-wrap">
@@ -32,7 +29,7 @@
         </div>
         <div class="hud-item lives">
           <span class="hud-label">목숨</span>
-          <span id="lives" class="hud-value">❤️❤️❤️</span>
+          <span id="lives" class="hud-value">♥♥♥</span>
         </div>
       </div>
 
@@ -42,9 +39,9 @@
         <!-- 시작 화면 -->
         <div id="overlay-start" class="overlay">
           <div class="card">
-            <div class="big-emoji">💩🐄</div>
-            <h1>똥피하기</h1>
-            <p class="lead">떨어지는 <b>💩</b>을 피하고<br /><b>🥛 우유</b>와 <b>🍀 네잎클로버</b>를 모으세요!</p>
+            <img class="card-logo" src="./assets/logo.png" alt="사르르목장" />
+            <h1>젖소 똥피하기</h1>
+            <p class="lead">우리 젖소가 <b>소똥 💩</b>을 피하고<br /><b>우유·아이스크림</b>을 모아요!</p>
             <button id="btn-start" class="btn btn-primary">게임 시작</button>
             <p class="hint">← → 방향키 또는 화면을 좌우로 터치·드래그</p>
           </div>
@@ -53,8 +50,8 @@
         <!-- 게임오버 화면 -->
         <div id="overlay-over" class="overlay hidden">
           <div class="card">
-            <div class="big-emoji" id="over-emoji">🐄💫</div>
-            <h1>게임 오버</h1>
+            <div class="over-badge" id="over-badge">🐄</div>
+            <h1 id="over-title">또 도전!</h1>
             <p class="score-line">점수 <b id="final-score">0</b></p>
             <p class="best-line" id="best-line"></p>
             <button id="btn-retry" class="btn btn-primary">다시 도전</button>
@@ -69,7 +66,7 @@
     </main>
 
     <footer class="footer">
-      <span>사르르목장 미니게임 · M1</span>
+      <span>사르르목장 · Fresh Milk Ice Cream</span>
       <span class="dot">·</span>
       <span>랭킹은 곧 열려요 🏆</span>
     </footer>
