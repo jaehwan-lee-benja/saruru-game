@@ -1,0 +1,175 @@
+:root {
+  --farm-sky: #cdeaffff;
+  --farm-grass: #a8e063;
+  --farm-grass-2: #8fce4e;
+  --cream: #fff8e7;
+  --butter: #f6c453;
+  --butter-deep: #eaa93d;
+  --brown: #6b4f3a;
+  --ink: #3d2f22;
+  --danger: #e4572e;
+  --shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Jua', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, #dff1ff 0%, #eafbe0 100%);
+  overscroll-behavior: none;
+}
+
+#app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 12px 16px;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* ---- Topbar ---- */
+.topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 4px 10px;
+}
+.brand { display: flex; align-items: center; gap: 6px; font-size: 20px; }
+.brand-emoji { font-size: 24px; }
+.brand-text { color: var(--brown); }
+.game-title {
+  background: var(--butter);
+  color: var(--ink);
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 16px;
+  box-shadow: var(--shadow);
+}
+
+/* ---- Stage ---- */
+.stage-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+.hud {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+.hud-item {
+  flex: 1;
+  background: var(--cream);
+  border-radius: 14px;
+  padding: 8px 6px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.hud-label { display: block; font-size: 12px; color: var(--brown); opacity: 0.8; }
+.hud-value { display: block; font-size: 22px; margin-top: 2px; }
+.hud-item.lives .hud-value { font-size: 16px; letter-spacing: -2px; }
+
+/* ---- Canvas ---- */
+.canvas-frame {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 360 / 540;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(80, 120, 40, 0.25), inset 0 0 0 4px #fff;
+}
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* ---- Overlays ---- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40, 60, 30, 0.35);
+  backdrop-filter: blur(2px);
+  transition: opacity 0.2s ease;
+}
+.overlay.hidden { opacity: 0; pointer-events: none; }
+.card {
+  background: var(--cream);
+  border-radius: 22px;
+  padding: 26px 22px;
+  width: 82%;
+  text-align: center;
+  box-shadow: 0 12px 0 rgba(0,0,0,0.12);
+  animation: pop 0.25s ease;
+}
+@keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.big-emoji { font-size: 46px; margin-bottom: 6px; }
+.card h1 { margin: 4px 0 10px; font-size: 28px; color: var(--brown); }
+.lead { font-size: 15px; line-height: 1.5; margin: 0 0 18px; }
+.hint { font-size: 12px; color: var(--brown); opacity: 0.75; margin: 14px 0 0; }
+.score-line { font-size: 18px; margin: 2px 0; }
+.score-line b { font-size: 30px; color: var(--danger); }
+.best-line { font-size: 14px; color: var(--butter-deep); min-height: 18px; margin: 4px 0 16px; }
+
+/* ---- Buttons ---- */
+.btn {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  font-size: 20px;
+  padding: 12px 30px;
+  transition: transform 0.08s ease;
+}
+.btn:active { transform: translateY(3px); }
+.btn-primary {
+  background: var(--butter);
+  color: var(--ink);
+  box-shadow: 0 5px 0 var(--butter-deep);
+}
+
+/* ---- Touch pad ---- */
+.controls {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  gap: 12px;
+}
+.pad {
+  flex: 1;
+  font-family: inherit;
+  font-size: 30px;
+  color: var(--brown);
+  background: var(--cream);
+  border: none;
+  border-radius: 18px;
+  padding: 14px 0;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  user-select: none;
+}
+.pad:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.12); background: #fff3d6; }
+
+/* ---- Footer ---- */
+.footer {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--brown);
+  opacity: 0.7;
+  display: flex;
+  gap: 6px;
+}
+.footer .dot { opacity: 0.5; }
+
+/* 데스크톱에서는 터치패드 숨김(키보드 사용) */
+@media (hover: hover) and (pointer: fine) {
+  .controls { display: none; }
+}
