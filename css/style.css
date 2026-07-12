@@ -147,36 +147,10 @@ html, body {
 }
 .btn-primary:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--navy-deep); }
 
-/* ---- Touch pad ---- */
-.controls {
-  width: 100%;
-  max-width: 336px;
-  display: flex;
-  gap: 12px;
-}
-.pad {
-  flex: 1;
-  font-family: var(--pixel-font);
-  font-size: 22px;
-  color: var(--navy);
-  background: var(--cream);
-  border: 3px solid var(--navy);
-  padding: 12px 0;
-  box-shadow: 4px 4px 0 var(--navy-deep);
-  cursor: pointer;
-  user-select: none;
-}
-.pad:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--navy-deep); background: var(--milk); }
-
 /* ---- Footer ---- */
 .footer {
   margin-top: 16px;
   font-size: 9px;
   color: var(--navy-soft);
   letter-spacing: 1px;
-}
-
-/* 데스크톱: 터치패드 숨김 */
-@media (hover: hover) and (pointer: fine) {
-  .controls { display: none; }
 }

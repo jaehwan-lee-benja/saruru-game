@@ -25,111 +25,124 @@
     bestNum: document.getElementById('best'),
     btnStart: document.getElementById('btn-start'),
     btnRetry: document.getElementById('btn-retry'),
-    btnLeft: document.getElementById('btn-left'),
-    btnRight: document.getElementById('btn-right'),
   };
 
   const BEST_KEY = 'saruru.ddong.best';
   let best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
   el.best.textContent = best;
 
-  // ===== 팔레트 =====
+  // ===== 팔레트 (3톤 색상변이 셰이딩 · 검정 대신 다크네이비 외곽선) =====
   const PAL = {
     '.': null,
-    N: '#385088', // 네이비(브랜드)
-    D: '#26365c', // 진한 네이비(외곽/그림자)
-    W: '#ffffff', // 흰색
+    D: '#2b3a63', // 소프트 네이비 외곽선(검정 대신)
+    N: '#415c99', // 젖소 무늬 네이비
+    n: '#2f4576', // 무늬 그림자
+    W: '#ffffff', // 흰
+    s: '#d3ddf0', // 흰 그림자(쿨톤 변이)
+    K: '#2a3559', // 눈동자(진네이비)
+    L: '#ffffff', // 눈 글린트
+    p: '#f7a8c4', // 볼터치 핑크
+    P: '#e8698f', // 콧구멍/입 진핑크
+    m: '#ffdfe8', // 주둥이 연핑크
+    o: '#f6c3d2', // 주둥이 그림자
     c: '#fff7db', // 크림(우유팩)
-    K: '#22315a', // 눈
-    P: '#ef6f92', // 딸기/콧구멍
-    p: '#f9c6d3', // 연분홍(주둥이)
-    Y: '#e<f0ddb9', // 뿔(수정됨 아래)
-    B: '#9a6733', // 소똥
-    b: '#6d4520', // 진한 갈색
-    t: '#f0ddb9', // 콘 반죽
-    G: '#8fc07a', // 잔디
-    g: '#6fa85a', // 진한 잔디
+    y: '#efdcac', // 크림 그림자
+    R: '#5f7fc4', // 우유팩 라벨 밝은 네이비
+    t: '#f6dca8', // 콘/바닐라
+    u: '#d8b877', // 콘 그림자
+    r: '#c98a55', // 콘 격자선
+    B: '#ad7742', // 소똥
+    b: '#7c4f26', // 소똥 그림자
+    h: '#cd975d', // 소똥 하이라이트
+    F: '#ff5a8a', // 딸기(컵 토핑)
+    G: '#8fc07a', g: '#6fa85a', // 잔디
   };
-  PAL.Y = '#f0ddb9';
 
-  // ===== 스프라이트 (문자맵) =====
-  // 젖소 (머리+우유팩모자+몸통, 18w x 18h) — 다리는 절차적으로 그림
+  // ===== 스프라이트 (문자맵, 18칸 폭) — 다리는 절차적으로 그림 =====
+  // 우유팩 모자 쓴 사르르목장 젖소. 눈은 낮고 넓게+글린트, 볼터치.
   const COW = [
-    '.....DDDDDD.....',
-    '.....DccccD.....',
-    '.....DcNNcD.....',
-    '.....DccccD.....',
-    '.....DDDDDD.....',
-    '...DDDDDDDDDD...',
-    '.D.DWWWWWWWWD.D.',
-    '...DNNWWWWWWD...',
-    '...DNNWWWWWWD...',
-    '...DWWWWWWWWD...',
-    '...DWKWWWWKWD...',
-    '...DWWWWWWWWD...',
-    '...DppppppppD...',
-    '...DpPppppPpD...',
-    '...DWWWWWWWWD...',
-    '....DWNNWWWD....',
-    '....DWWWWWWD....',
+    '.......DDDD.......',
+    '.......DccD.......',
+    '......DcccyD......',
+    '......DcRRyD......',
+    '......DccccD......',
+    '.....DDDDDDDD.....',
+    '....DWWWWWWWWD....',
+    '...DWWNNNWWWWWD...',
+    '..DWWWWNNNNWWWWD..',
+    '.DWWWWWWnnWWWWWWD.',
+    '.DWWWWWWWWWWWWWWD.',
+    '.DWWWWWWWWWWWWWWD.',
+    '.DWWWLKWWWWLKWWWD.',
+    '.DWWWKKWWWWKKWWWD.',
+    '.DWWpKKWWWWKKpWWD.',
+    '.DWWpWWmmmmWWpWWD.',
+    '.DWWsWmmoommWsWWD.',
+    '.DWWWWmPmmPmWWWWD.',
+    '.DWWWWmmPPmmWWWWD.',
+    '..DsWWWWWWWWWWsD..',
+    '....DDsWWWWsDD....',
+    '......DDDDDD......',
   ];
 
   const MILK = [
-    '..DDDDDD..',
-    '..DccccD..',
-    '.DDccccDD.',
-    '.DccccccD.',
-    '.DccNNccD.',
-    '.DcNNNNcD.',
-    '.DccNNccD.',
-    '.DccccccD.',
+    '....DD....',
+    '...DccD...',
+    '..DcccyD..',
+    '.DccccyyD.',
+    '.DccccyyD.',
+    '.DcRRRcyD.',
+    '.DcRRRcyD.',
+    '.DccccyyD.',
     '.DDDDDDDD.',
   ];
 
   const CONE = [
-    '..WWWWWW..',
     '.WWWWWWWW.',
-    'WWWWWWWWWW',
-    'WWWWWWWWWW',
+    'WWWWWWWWsW',
+    'WWWWWWWWsW',
     '.tttttttt.',
-    '.DttttttD.',
-    '..DttttD..',
-    '..DtttD...',
-    '...DttD...',
-    '...DtD....',
-    '....D.....',
+    '.trtttrtu.',
+    '.DtrttrtuD',
+    '..DtrrtuD.',
+    '..DturtuD.',
+    '...DtutD..',
+    '...DtuD...',
+    '....DD....',
   ];
 
   const CUP = [
-    '...WW.....',
-    '..WWWW.WW.',
-    '.WWWWWWWWW',
-    'WWWWWWWWWW',
-    'WWWWWWWWWW',
+    '...FF.....',
+    '..FFFF.FF.',
+    '.WWWWWWFFW',
+    'WWWWWWWWsW',
+    'WWWWWWWWsW',
     '.tttttttt.',
-    '.tPtttPtt.',
-    '.tttttttt.',
-    '..tttttt..',
-    '..DttttD..',
+    '.tFtttFtu.',
+    '.tttttttu.',
+    '..tttttu..',
+    '..DtttuD..',
     '...DDDD...',
   ];
 
+  // 소똥 — 살짝 능글맞지만 미워할 수 없게(눈+반짝)
   const POOP = [
-    '....BB....',
-    '...BbbB...',
-    '..BbWWbB..',  // 눈 흰자
-    '..BWKWKB..',  // 눈동자
-    '.BbbbbbbB.',
-    'BbbbWWbbbB',
-    'BbbbbbbbbB',
-    '.DBBBBBBD.',
+    '....hh....',
+    '...hBBh...',
+    '..hBBBBb..',
+    '..BWKBKWb.',  // 눈(흰자+눈동자)
+    '.hBBBBBBb.',
+    'hBBWKKWBBb',  // 반짝 입
+    'BBBBBBBBBb',
+    '.bBBBBBBb.',
+    '..bbbbbb..',
   ];
 
   const CLOUD = [
-    '..WWWW..',
-    '.WWWWWW.',
-    'WWWWWWWW',
-    '.WWWWWW.',
+    '...WWWW...',
+    '.WWWWWWWW.',
+    'WWWWWWWWWW',
+    'WWWWssssWW',
   ];
 
   function sizeOf(sp) { return { w: Math.max(...sp.map(r => r.length)), h: sp.length }; }
@@ -189,16 +202,6 @@
   canvas.addEventListener('mousedown', (e) => { canvas._drag = true; onPointer(e); });
   window.addEventListener('mousemove', (e) => { if (canvas._drag) onPointer(e); });
   window.addEventListener('mouseup', () => { canvas._drag = false; input.targetX = null; });
-  function hold(btn, dir) {
-    const set = (v) => (e) => { input[dir] = v; e.preventDefault(); };
-    btn.addEventListener('touchstart', set(true), { passive: false });
-    btn.addEventListener('touchend', set(false));
-    btn.addEventListener('mousedown', set(true));
-    btn.addEventListener('mouseup', set(false));
-    btn.addEventListener('mouseleave', set(false));
-  }
-  hold(el.btnLeft, 'left');
-  hold(el.btnRight, 'right');
   el.btnStart.addEventListener('click', startGame);
   el.btnRetry.addEventListener('click', startGame);
 
@@ -312,37 +315,71 @@
 
   // ===== 렌더 =====
   function drawBackground() {
-    // 하늘
-    ctx.fillStyle = '#bfe0f5';
-    ctx.fillRect(0, 0, VW, VH - GROUND);
-    ctx.fillStyle = '#d6ecf9';
-    ctx.fillRect(0, 0, VW, 40);
+    // 하늘 (3단 그라데이션 밴드)
+    ctx.fillStyle = '#cfeafb'; ctx.fillRect(0, 0, VW, VH - GROUND);
+    ctx.fillStyle = '#dff2fc'; ctx.fillRect(0, 0, VW, 52);
+    ctx.fillStyle = '#eaf8fe'; ctx.fillRect(0, 0, VW, 22);
+    // 뒤쪽 언덕 (부드러운 곡선 실루엣)
+    const hillTop = VH - GROUND;
+    ctx.fillStyle = '#a6d089';
+    for (let x = 0; x < VW; x++) {
+      const h = 10 + Math.round(6 * Math.sin(x * 0.05 + 1.5) + 4 * Math.sin(x * 0.13));
+      ctx.fillRect(x, hillTop - h, 1, h);
+    }
+    ctx.fillStyle = '#b7dc9b';
+    for (let x = 0; x < VW; x++) {
+      const h = 6 + Math.round(4 * Math.sin(x * 0.07 + 3.2));
+      ctx.fillRect(x, hillTop - h, 1, h);
+    }
     // 구름
     for (const cl of clouds) drawSprite(CLOUD, cl.x, cl.y);
     // 초원
     ctx.fillStyle = '#8fc07a';
-    ctx.fillRect(0, VH - GROUND, VW, GROUND);
+    ctx.fillRect(0, hillTop, VW, GROUND);
+    ctx.fillStyle = '#7bb168';
+    ctx.fillRect(0, hillTop, VW, 2);
     ctx.fillStyle = '#6fa85a';
-    ctx.fillRect(0, VH - GROUND, VW, 3);
+    ctx.fillRect(0, hillTop + 2, VW, 1);
     // 잔디 픽셀 texture
-    ctx.fillStyle = '#6fa85a';
-    for (let x = 2; x < VW; x += 8) {
-      const yy = VH - GROUND + 6 + ((x * 7) % 9);
+    ctx.fillStyle = '#7bb168';
+    for (let x = 2; x < VW; x += 7) {
+      const yy = hillTop + 6 + ((x * 7) % 9);
       ctx.fillRect(x, yy, 1, 2);
-      ctx.fillRect(x + 3, yy + 3, 1, 2);
+      ctx.fillRect(x + 3, yy + 4, 1, 2);
+    }
+    // 작은 꽃 (분홍/노랑 포인트)
+    const flowers = [[10, 6, '#ffd7e6'], [46, 12, '#fff0a8'], [88, 7, '#ffd7e6'], [116, 14, '#fff0a8']];
+    for (const [fx, fo, fc] of flowers) {
+      const fy = hillTop + fo;
+      ctx.fillStyle = fc; ctx.fillRect(fx, fy, 2, 2);
+      ctx.fillStyle = '#e58fb0'; ctx.fillRect(fx, fy, 1, 1);
     }
   }
 
   function drawCow() {
-    const moving = Math.abs(player.vx) > 0.15 && state === 'playing';
-    const bob = moving ? (Math.floor(player.phase * 2) % 2) : 0;
+    const playing = state === 'playing';
+    const moving = Math.abs(player.vx) > 0.15 && playing;
+    // 걷기 = 발맞춰 1px 바운스 / 정지 = 느린 숨쉬기 1px 바운스(아이들)
+    const bob = moving
+      ? (Math.floor(player.phase * 2) % 2)
+      : (Math.floor(elapsed * 2.2) % 2);
     const sz = sizeOf(COW);
     const x = player.x - sz.w / 2;
     const y = PLAYER_Y - sz.h - 2 - bob; // 다리 공간 2px
     const flash = invuln > 0 && Math.floor(invuln / 100) % 2 === 0;
     if (flash) return;
     drawSprite(COW, x, y);
-    // 다리 (절차적 · 걷기 2프레임)
+    // 가끔 눈 깜빡임(살아있는 느낌) — 눈 위에 흰 라인 덮기
+    const blink = playing && !moving && (elapsed % 3.4) < 0.14;
+    if (blink) {
+      ctx.fillStyle = PAL.W;
+      ctx.fillRect(Math.round(x) + 3, Math.round(y) + 12, 3, 2);
+      ctx.fillRect(Math.round(x) + 12, Math.round(y) + 12, 3, 2);
+      ctx.fillStyle = PAL.K;
+      ctx.fillRect(Math.round(x) + 3, Math.round(y) + 13, 3, 1);
+      ctx.fillRect(Math.round(x) + 12, Math.round(y) + 13, 3, 1);
+    }
+    // 다리 (절차적 · 걷기 2프레임 · 발굽 진네이비)
     ctx.fillStyle = PAL.D;
     const legTop = PLAYER_Y - 2 - bob;
     const swing = moving ? (Math.floor(player.phase * 2) % 2 === 0 ? 1 : -1) : 0;
