@@ -58,31 +58,24 @@
     G: '#8fc07a', g: '#6fa85a', // 잔디
   };
 
-  // ===== 스프라이트 (문자맵, 18칸 폭) — 다리는 절차적으로 그림 =====
-  // 우유팩 모자 쓴 사르르목장 젖소. 눈은 낮고 넓게+글린트, 볼터치.
+  // ===== 스프라이트 (문자맵) =====
+  // 젖소 = 측면(옆모습) 24칸 폭 · 다리는 절차적으로 그림. 이동방향으로 flip.
+  // 우유팩 모자·귀·글린트 눈·볼터치·핑크 주둥이·젖소무늬·꼬리.
   const COW = [
-    '.......DDDD.......',
-    '.......DccD.......',
-    '......DcccyD......',
-    '......DcRRyD......',
-    '......DccccD......',
-    '.....DDDDDDDD.....',
-    '....DWWWWWWWWD....',
-    '...DWWNNNWWWWWD...',
-    '..DWWWWNNNNWWWWD..',
-    '.DWWWWWWnnWWWWWWD.',
-    '.DWWWWWWWWWWWWWWD.',
-    '.DWWWWWWWWWWWWWWD.',
-    '.DWWWLKWWWWLKWWWD.',
-    '.DWWWKKWWWWKKWWWD.',
-    '.DWWpKKWWWWKKpWWD.',
-    '.DWWpWWmmmmWWpWWD.',
-    '.DWWsWmmoommWsWWD.',
-    '.DWWWWmPmmPmWWWWD.',
-    '.DWWWWmmPPmmWWWWD.',
-    '..DsWWWWWWWWWWsD..',
-    '....DDsWWWWsDD....',
-    '......DDDDDD......',
+    '...............DDDD.....',
+    '...............DccD.....',
+    '..............DccccD....',
+    '...........DW.DcRRcD....',
+    '...........DWWDccccD....',
+    '.............DWWWWWWD...',
+    '...DDWWWWWWWWWWWWWWWWD..',
+    '.nDWWNNNWWWWWWWWWLKWWWD.',
+    'nnDWNNNNNWWWWWWWWKKWmmDD',
+    '.nDWWNNNWWWWWWWWWppmmmoD',
+    '.DsWWWWWWWWWWWWWWWWmPmoD',
+    '.DsWWWWWWWWWWWWWWWWmooD.',
+    '..DsWWWWWWWWWWWWWWWWsD..',
+    '...DDWWWWWWWWWWWWWDD....',
   ];
 
   const MILK = [
@@ -147,13 +140,17 @@
 
   function sizeOf(sp) { return { w: Math.max(...sp.map(r => r.length)), h: sp.length }; }
 
-  function drawSprite(sp, x, y) {
+  function drawSprite(sp, x, y, flip) {
     x = Math.round(x); y = Math.round(y);
+    const w = Math.max(...sp.map(r => r.length));
     for (let r = 0; r < sp.length; r++) {
       const row = sp[r];
       for (let c = 0; c < row.length; c++) {
         const col = PAL[row[c]];
-        if (col) { ctx.fillStyle = col; ctx.fillRect(x + c, y + r, 1, 1); }
+        if (col) {
+          ctx.fillStyle = col;
+          ctx.fillRect(x + (flip ? (w - 1 - c) : c), y + r, 1, 1);
+        }
       }
     }
   }
@@ -168,7 +165,7 @@
 
   // ===== 상태 =====
   let state = 'ready';
-  const player = { x: VW / 2, w: 14, speed: 1.7, vx: 0, phase: 0 };
+  const player = { x: VW / 2, w: 18, speed: 1.7, vx: 0, phase: 0, facing: 1 };
   let items = [];
   let sparks = [];
   let score = 0, lives = 3, elapsed = 0, spawnTimer = 0, invuln = 0, lastTime = 0;
@@ -210,7 +207,7 @@
     state = 'playing';
     items = []; sparks = [];
     score = 0; lives = 3; elapsed = 0; spawnTimer = 0; invuln = 0;
-    player.x = VW / 2; player.vx = 0; player.phase = 0;
+    player.x = VW / 2; player.vx = 0; player.phase = 0; player.facing = 1;
     input.targetX = null;
     el.start.classList.add('hidden');
     el.over.classList.add('hidden');
@@ -276,7 +273,10 @@
     if (input.right) player.x += player.speed * f;
     player.x = Math.max(player.w / 2, Math.min(VW - player.w / 2, player.x));
     player.vx = player.x - prev;
-    if (Math.abs(player.vx) > 0.15) player.phase += 0.3 * f;
+    if (Math.abs(player.vx) > 0.15) {
+      player.phase += 0.3 * f;
+      player.facing = player.vx > 0 ? 1 : -1; // 이동방향 바라보기
+    }
 
     const spawnInterval = Math.max(340, 900 - elapsed * 22);
     spawnTimer += dt;
@@ -364,28 +364,29 @@
       ? (Math.floor(player.phase * 2) % 2)
       : (Math.floor(elapsed * 2.2) % 2);
     const sz = sizeOf(COW);
+    const legLen = 3;
+    const flip = player.facing < 0;         // 왼쪽 이동 시 좌우 반전
     const x = player.x - sz.w / 2;
-    const y = PLAYER_Y - sz.h - 2 - bob; // 다리 공간 2px
+    const y = PLAYER_Y - legLen - sz.h - bob;
     const flash = invuln > 0 && Math.floor(invuln / 100) % 2 === 0;
     if (flash) return;
-    drawSprite(COW, x, y);
-    // 가끔 눈 깜빡임(살아있는 느낌) — 눈 위에 흰 라인 덮기
-    const blink = playing && !moving && (elapsed % 3.4) < 0.14;
-    if (blink) {
-      ctx.fillStyle = PAL.W;
-      ctx.fillRect(Math.round(x) + 3, Math.round(y) + 12, 3, 2);
-      ctx.fillRect(Math.round(x) + 12, Math.round(y) + 12, 3, 2);
-      ctx.fillStyle = PAL.K;
-      ctx.fillRect(Math.round(x) + 3, Math.round(y) + 13, 3, 1);
-      ctx.fillRect(Math.round(x) + 12, Math.round(y) + 13, 3, 1);
-    }
-    // 다리 (절차적 · 걷기 2프레임 · 발굽 진네이비)
+    // 발밑 그림자
+    ctx.globalAlpha = 0.16;
+    ctx.fillStyle = '#26365c';
+    ctx.fillRect(Math.round(player.x) - 9, PLAYER_Y - 1, 18, 2);
+    ctx.globalAlpha = 1;
+    // 다리 4개 (절차적 · 걷기 2프레임 · 발 planted, 발굽 진네이비)
+    const bodyBottom = y + sz.h;
+    const step = Math.floor(player.phase * 2) % 2;
+    const offs = [-7, -3, 3, 7];
     ctx.fillStyle = PAL.D;
-    const legTop = PLAYER_Y - 2 - bob;
-    const swing = moving ? (Math.floor(player.phase * 2) % 2 === 0 ? 1 : -1) : 0;
-    const lx = Math.round(player.x);
-    ctx.fillRect(lx - 4, legTop, 2, 2 + (swing > 0 ? 0 : 1));
-    ctx.fillRect(lx + 2, legTop, 2, 2 + (swing > 0 ? 1 : 0));
+    for (let i = 0; i < offs.length; i++) {
+      const lifted = moving && ((i + step) % 2 === 0) ? 1 : 0;
+      const h = (PLAYER_Y - lifted) - bodyBottom;
+      if (h > 0) ctx.fillRect(Math.round(player.x) + offs[i] - 1, bodyBottom, 2, h);
+    }
+    // 몸통(측면 스프라이트)
+    drawSprite(COW, x, y, flip);
   }
 
   function render() {
