@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#f6c453" />
+  <title>사르르목장 · 똥피하기</title>
+  <meta name="description" content="사르르목장 미니게임 — 떨어지는 똥을 피하고 우유를 모으세요!" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-emoji">🐄</span>
+        <span class="brand-text">사르르목장</span>
+      </div>
+      <div class="game-title">똥피하기</div>
+    </header>
+
+    <main class="stage-wrap">
+      <div class="hud">
+        <div class="hud-item">
+          <span class="hud-label">점수</span>
+          <span id="score" class="hud-value">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">최고</span>
+          <span id="best" class="hud-value">0</span>
+        </div>
+        <div class="hud-item lives">
+          <span class="hud-label">목숨</span>
+          <span id="lives" class="hud-value">❤️❤️❤️</span>
+        </div>
+      </div>
+
+      <div class="canvas-frame">
+        <canvas id="game" width="360" height="540"></canvas>
+
+        <!-- 시작 화면 -->
+        <div id="overlay-start" class="overlay">
+          <div class="card">
+            <div class="big-emoji">💩🐄</div>
+            <h1>똥피하기</h1>
+            <p class="lead">떨어지는 <b>💩</b>을 피하고<br /><b>🥛 우유</b>와 <b>🍀 네잎클로버</b>를 모으세요!</p>
+            <button id="btn-start" class="btn btn-primary">게임 시작</button>
+            <p class="hint">← → 방향키 또는 화면을 좌우로 터치·드래그</p>
+          </div>
+        </div>
+
+        <!-- 게임오버 화면 -->
+        <div id="overlay-over" class="overlay hidden">
+          <div class="card">
+            <div class="big-emoji" id="over-emoji">🐄💫</div>
+            <h1>게임 오버</h1>
+            <p class="score-line">점수 <b id="final-score">0</b></p>
+            <p class="best-line" id="best-line"></p>
+            <button id="btn-retry" class="btn btn-primary">다시 도전</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="btn-left" class="pad" aria-label="왼쪽">◀</button>
+        <button id="btn-right" class="pad" aria-label="오른쪽">▶</button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>사르르목장 미니게임 · M1</span>
+      <span class="dot">·</span>
+      <span>랭킹은 곧 열려요 🏆</span>
+    </footer>
+  </div>
+
+  <script src="./js/game.js"></script>
+</body>
+</html>

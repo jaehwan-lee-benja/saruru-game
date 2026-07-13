@@ -1,0 +1,176 @@
+:root {
+  /* 사르르목장 브랜드 팔레트 (로고 #385088 기준) */
+  --navy: #385088;         /* 브랜드 메인 블루 (라인·텍스트·버튼) */
+  --navy-deep: #2b3d68;    /* 진한 네이비 (그림자·강조) */
+  --navy-soft: #7d92c0;    /* 연한 네이비 */
+  --sky-1: #e8f1fb;        /* 하늘 밝은 톤 */
+  --sky-2: #d3e5f7;        /* 하늘 진한 톤 */
+  --cream: #fffdf6;        /* 우유 크림 화이트 (카드) */
+  --milk: #f4f8fd;         /* 연한 우유빛 */
+  --meadow: #cfe6cf;       /* 절제된 세이지 초원 */
+  --meadow-2: #bcdcb9;
+  --berry: #ef6f92;        /* 딸기 액센트 (하트·신기록) */
+  --ink: #2b3d68;
+  --shadow: 0 5px 0 rgba(43, 61, 104, 0.14);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Jua', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--sky-1) 0%, #eef7ee 100%);
+  overscroll-behavior: none;
+}
+
+#app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 12px 18px;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* ---- Topbar ---- */
+.topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 4px 12px;
+}
+.brand-logo {
+  height: 62px;
+  width: auto;
+  filter: drop-shadow(0 3px 0 rgba(43, 61, 104, 0.10));
+}
+
+/* ---- Stage ---- */
+.stage-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+.hud {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+.hud-item {
+  flex: 1;
+  background: var(--cream);
+  border: 2px solid var(--navy);
+  border-radius: 16px;
+  padding: 7px 6px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.hud-label { display: block; font-size: 12px; color: var(--navy-soft); }
+.hud-value { display: block; font-size: 22px; margin-top: 2px; color: var(--navy); }
+.hud-item.lives .hud-value { font-size: 20px; letter-spacing: 1px; color: var(--berry); }
+
+/* ---- Canvas ---- */
+.canvas-frame {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 360 / 540;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 3px solid var(--navy);
+  box-shadow: 0 10px 26px rgba(43, 61, 104, 0.22);
+}
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* ---- Overlays ---- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(43, 61, 104, 0.34);
+  backdrop-filter: blur(2px);
+  transition: opacity 0.2s ease;
+}
+.overlay.hidden { opacity: 0; pointer-events: none; }
+.card {
+  background: var(--cream);
+  border: 3px solid var(--navy);
+  border-radius: 24px;
+  padding: 24px 22px;
+  width: 84%;
+  text-align: center;
+  box-shadow: 0 12px 0 rgba(43, 61, 104, 0.16);
+  animation: pop 0.25s ease;
+}
+@keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.card-logo { width: 130px; height: auto; margin-bottom: 4px; }
+.over-badge { font-size: 46px; margin-bottom: 4px; }
+.card h1 { margin: 4px 0 10px; font-size: 26px; color: var(--navy); }
+.lead { font-size: 15px; line-height: 1.55; margin: 0 0 18px; color: var(--navy-deep); }
+.lead b { color: var(--navy); }
+.hint { font-size: 12px; color: var(--navy-soft); margin: 14px 0 0; }
+.score-line { font-size: 18px; margin: 2px 0; color: var(--navy-deep); }
+.score-line b { font-size: 30px; color: var(--berry); }
+.best-line { font-size: 14px; color: var(--navy-soft); min-height: 18px; margin: 4px 0 16px; }
+
+/* ---- Buttons ---- */
+.btn {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  font-size: 20px;
+  padding: 12px 32px;
+  transition: transform 0.08s ease;
+}
+.btn:active { transform: translateY(3px); }
+.btn-primary {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 5px 0 var(--navy-deep);
+}
+
+/* ---- Touch pad ---- */
+.controls {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  gap: 12px;
+}
+.pad {
+  flex: 1;
+  font-family: inherit;
+  font-size: 28px;
+  color: var(--navy);
+  background: var(--cream);
+  border: 2px solid var(--navy);
+  border-radius: 18px;
+  padding: 13px 0;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  user-select: none;
+}
+.pad:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(43,61,104,0.14); background: var(--milk); }
+
+/* ---- Footer ---- */
+.footer {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--navy-soft);
+  display: flex;
+  gap: 6px;
+}
+.footer .dot { opacity: 0.5; }
+
+/* 데스크톱: 터치패드 숨김(키보드) */
+@media (hover: hover) and (pointer: fine) {
+  .controls { display: none; }
+}

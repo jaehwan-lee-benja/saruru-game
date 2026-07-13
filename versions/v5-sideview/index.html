@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#385088" />
+  <title>사르르목장 · 젖소 똥피하기</title>
+  <meta name="description" content="사르르목장 레트로 픽셀 미니게임 — 우리 젖소가 소똥을 피하고 우유·아이스크림을 모아요!" />
+  <link rel="icon" href="./assets/logo.png" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <img class="brand-logo" src="./assets/logo.png" alt="사르르목장" />
+    </header>
+
+    <main class="stage-wrap">
+      <div class="hud">
+        <div class="hud-item">
+          <span class="hud-label">SCORE</span>
+          <span id="score" class="hud-value">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">BEST</span>
+          <span id="best" class="hud-value">0</span>
+        </div>
+        <div class="hud-item lives">
+          <span class="hud-label">LIFE</span>
+          <span id="lives" class="hud-value">♥♥♥</span>
+        </div>
+      </div>
+
+      <div class="canvas-frame">
+        <canvas id="game" width="128" height="192"></canvas>
+
+        <!-- 시작 화면 -->
+        <div id="overlay-start" class="overlay">
+          <div class="card">
+            <img class="card-logo" src="./assets/logo.png" alt="사르르목장" />
+            <h1>젖소 똥피하기</h1>
+            <p class="lead">우리 젖소가 <b>소똥</b>을 피하고<br /><b>우유·아이스크림</b>을 모아요!</p>
+            <button id="btn-start" class="btn btn-primary">▶ START</button>
+            <p class="hint">화면을 좌우로 <b>터치·드래그</b><br />(PC는 ← → 방향키)</p>
+          </div>
+        </div>
+
+        <!-- 게임오버 화면 -->
+        <div id="overlay-over" class="overlay hidden">
+          <div class="card">
+            <div class="over-badge" id="over-badge">GAME<br>OVER</div>
+            <p class="score-line">SCORE <b id="final-score">0</b></p>
+            <p class="best-line" id="best-line"></p>
+            <button id="btn-retry" class="btn btn-primary">↻ RETRY</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>사르르목장 · FRESH MILK ICE CREAM</span>
+    </footer>
+  </div>
+
+  <script src="./js/game.js"></script>
+</body>
+</html>
