@@ -221,46 +221,40 @@
   // --- 배경: 실제 사르르목장 건물(포천 산정호수로 130)을 픽셀로 귀엽게 ------
   // 실물 특징: 단층 · 박공지붕(진회색 금속) · 베이지 벽돌 벽 · 게이블 면에 큰 네이비 젖소
   // 엠블럼 · 오른쪽 통창 입구. 베이지 벽은 BI 크림 램프(c/y/Y)와 그대로 맞아떨어진다.
-  // 게이블 정면 + 오른쪽으로 물러나는 지붕면 + 측면 벽 (레퍼런스 구조).
-  // ★평행 투영: 물러나는 선(용마루·처마·바닥)이 전부 후퇴벡터 (DX,DY) 하나로 나란하다.
-  //   앞뒤 게이블의 두 변도 서로 나란하다. 소실점 수렴이 없어 픽셀에서 선이 깔끔하다.
+  // 레퍼런스 구조: 게이블 정면(왼쪽) + 오른쪽으로 길게 내려오는 지붕면 + 측면 벽.
+  // ★처마선과 바닥선은 수평으로 나란하다 — 측면은 직사각형. 기우는 건 지붕 슬로프뿐.
   function farmHouse() {
-    const g = blank(50, 40);
+    const g = blank(48, 34);
     const lerp = (a, b, t) => a + (b - a) * t;
-    const AX = 13, APY = 3;         // 게이블 꼭지
-    const EY = 16, BY = 31;         // 정면 처마선 · 바닥선
-    const NX = 24;                  // 정면/측면이 만나는 모서리
-    const DX = 21, DY = 5;          // 후퇴벡터 — 모든 옆선이 이 기울기
-    const RX = AX + DX, RY = APY + DY;   // 용마루 먼 끝
-    const FX = NX + DX;                  // 측면 먼 끝
+    const AX = 13, APY = 3;      // 지붕 꼭지
+    const EY = 17, BY = 31;      // 처마선 · 바닥선 (둘 다 수평)
+    const LX = 1, RX = 45;       // 지붕 좌우 끝 (처마 돌출)
+    const NX = 24;               // 정면/측면이 만나는 모서리
 
-    // 측면 벽 — 평행사변형(위=처마선, 아래=바닥선, 같은 기울기)
-    for (let x = NX; x <= FX; x++) {
-      const t = (x - NX) / DX;
-      const top = Math.round(EY + t * DY), bot = Math.round(BY + t * DY);
-      for (let y = top; y <= bot; y++) if (g[y]) g[y][x] = 'a';
+    // 지붕 — 꼭지에서 좌우로 내려오는 슬로프, 아래는 수평 처마선
+    for (let x = LX; x <= RX; x++) {
+      const y = x <= AX ? lerp(EY, APY, (x - LX) / (AX - LX))
+                        : lerp(APY, EY, (x - AX) / (RX - AX));
+      for (let yy = Math.round(y); yy <= EY; yy++) g[yy][x] = 'v';
     }
-    // 지붕면 — 평행사변형(위=용마루, 아래=처마)
-    for (let x = AX; x <= FX; x++) {
-      const top = x <= RX ? lerp(APY, RY, (x - AX) / DX)
-                          : lerp(RY, EY + DY, (x - RX) / (FX - RX));   // 먼 게이블 변
-      const bot = x <= NX ? lerp(APY, EY, (x - AX) / (NX - AX))        // 앞 게이블 변
-                          : lerp(EY, EY + DY, (x - NX) / DX);
-      for (let y = Math.round(top); y <= Math.round(bot); y++) if (g[y]) g[y][x] = 'v';
-    }
-    // 정면 게이블 벽 + 몸통 (밝은 베이지)
+    // 정면 게이블 벽 (밝은 베이지) — 지붕 삼각형 안쪽
     for (let r = APY; r <= EY; r++) {
       const hw = Math.round((r - APY) * (NX - AX) / (EY - APY));
       for (let c = AX - hw; c <= AX + hw; c++) if (c >= 0) g[r][c] = 'A';
     }
-    for (let r = EY; r <= BY; r++) for (let c = 2; c <= NX; c++) g[r][c] = 'A';
-    // 게이블 두 변의 지붕 마감 (밝은 면 · 처마 돌출)
-    for (let x = 0; x <= AX; x++) {
-      const y = Math.round(lerp(EY + 2, APY, x / AX));
-      for (let k = 0; k < 3; k++) if (g[y + k]) g[y + k][x] = 'V';
+    // 벽 — 정면(밝음) + 측면(그늘). 위아래 모두 수평.
+    for (let r = EY; r <= BY; r++) {
+      for (let c = 2; c <= NX; c++) g[r][c] = 'A';
+      for (let c = NX + 1; c <= 43; c++) g[r][c] = 'a';
     }
-    for (let x = AX; x <= NX + 1; x++) {
-      const y = Math.round(lerp(APY, EY + 1, (x - AX) / (NX + 1 - AX)));
+    // 게이블 오른쪽 변 = 정면/지붕이 만나는 모서리 (잉크선으로 또렷하게)
+    for (let x = AX; x <= NX; x++) {
+      const y = Math.round(lerp(APY, EY, (x - AX) / (NX - AX)));
+      if (g[y]) g[y][x] = 'D';
+    }
+    // 게이블 왼쪽 변 지붕 마감 (밝은 면)
+    for (let x = LX; x <= AX; x++) {
+      const y = Math.round(lerp(EY, APY, (x - LX) / (AX - LX)));
       for (let k = 0; k < 3; k++) if (g[y + k]) g[y + k][x] = 'V';
     }
     outlineDir(g, ['A', 'a', 'V', 'v'], 22, 18, false);
