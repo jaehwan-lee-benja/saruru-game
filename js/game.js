@@ -193,22 +193,18 @@
     for (let r = 11; r < 19; r++) g[r][3] = 'W';
     outlineDir(g, ['W', 's', 'S', 'L'], 7, 11, false); despeckle(g); return g;
   }
-  function scoopItem() { // tier1 — 소프트콘 아이스크림(최고득점) · 우유병보다 확실히 크게
-    const g = blank(24, 32);
-    // 소프트서브 스월 = 위로 갈수록 작아지는 디스크 3단 + 뾰족한 꼭지
-    discShade(g, 12, 16, 8.5, 5, ['W', 'W', 'e', 's', 'S']);
-    discShade(g, 12, 11, 6.5, 4, ['W', 'W', 'e', 's', 'S']);
-    discShade(g, 12, 7, 4.5, 3.2, ['W', 'W', 'e', 's']);
-    discShade(g, 12, 4, 2.4, 2, ['W', 'W', 'e']);
-    put(g, 1, 11, 'WW');
-    // 딸기 한 알(브랜드 포인트 · 프리미엄 신호)
-    discShade(g, 17, 6, 2.6, 2.2, ['p', 'P', 'Q']);
-    // 와플콘 — 격자 무늬
-    for (let r = 20; r < 31; r++) {
-      const w = Math.max(0, Math.round((31 - r) * 0.78));
-      for (let c = 12 - w; c <= 12 + w; c++) g[r][c] = ((c - 12 + r) % 3 === 0) ? 'u' : 't';
+  function scoopItem() { // tier1 — 소프트콘 아이스크림(최고득점) · 우유병과 같은 크기
+    const g = blank(14, 21);
+    // 소프트서브 스월 = 위로 갈수록 작아지는 디스크 3단
+    discShade(g, 7, 8, 5, 3.4, ['W', 'W', 'e', 's', 'S']);
+    discShade(g, 7, 5, 3.6, 2.6, ['W', 'W', 'e', 's']);
+    discShade(g, 7, 2.5, 2.2, 1.8, ['W', 'W', 'e']);
+    // 와플콘
+    for (let r = 12; r < 20; r++) {
+      const w = Math.max(0, Math.round((20 - r) * 0.62));
+      for (let c = 7 - w; c <= 7 + w; c++) g[r][c] = ((c - 7 + r) % 3 === 0) ? 'u' : 't';
     }
-    outlineDir(g, ['W', 'e', 's', 'S', 't', 'u', 'p', 'P', 'Q'], 12, 15, false);
+    outlineDir(g, ['W', 'e', 's', 'S', 't', 'u'], 7, 10, false);
     despeckle(g); return g;
   }
   function poopItem() { // 장애물 — 능글맞지만 미워할 수 없게
@@ -225,43 +221,46 @@
   // --- 배경: 실제 사르르목장 건물(포천 산정호수로 130)을 픽셀로 귀엽게 ------
   // 실물 특징: 단층 · 박공지붕(진회색 금속) · 베이지 벽돌 벽 · 게이블 면에 큰 네이비 젖소
   // 엠블럼 · 오른쪽 통창 입구. 베이지 벽은 BI 크림 램프(c/y/Y)와 그대로 맞아떨어진다.
-  // 게이블 정면 + 오른쪽으로 물러나는 지붕면 + 측면 벽이 보이는 구조(레퍼런스 참고).
-  // 소실점 수렴 없는 평행 투영이라 픽셀에서 선이 깔끔하다. 창문·엠블럼 없이 심플하게.
+  // 게이블 정면 + 오른쪽으로 물러나는 지붕면 + 측면 벽 (레퍼런스 구조).
+  // ★평행 투영: 물러나는 선(용마루·처마·바닥)이 전부 후퇴벡터 (DX,DY) 하나로 나란하다.
+  //   앞뒤 게이블의 두 변도 서로 나란하다. 소실점 수렴이 없어 픽셀에서 선이 깔끔하다.
   function farmHouse() {
-    const g = blank(50, 34);
+    const g = blank(50, 40);
     const lerp = (a, b, t) => a + (b - a) * t;
     const AX = 13, APY = 3;         // 게이블 꼭지
     const EY = 16, BY = 31;         // 정면 처마선 · 바닥선
     const NX = 24;                  // 정면/측면이 만나는 모서리
-    const FX = 44, FEY = 21;        // 측면 끝 · 그쪽 처마선(오른쪽으로 내려감)
-    const RX = 35, RY = 8;          // 용마루 오른쪽 끝
+    const DX = 21, DY = 5;          // 후퇴벡터 — 모든 옆선이 이 기울기
+    const RX = AX + DX, RY = APY + DY;   // 용마루 먼 끝
+    const FX = NX + DX;                  // 측면 먼 끝
 
-    // 측면 벽 (그늘진 베이지) — 처마선 아래부터 바닥까지
+    // 측면 벽 — 평행사변형(위=처마선, 아래=바닥선, 같은 기울기)
     for (let x = NX; x <= FX; x++) {
-      const top = Math.round(lerp(EY, FEY, (x - NX) / (FX - NX)));
-      for (let y = top; y <= BY; y++) g[y][x] = 'a';
+      const t = (x - NX) / DX;
+      const top = Math.round(EY + t * DY), bot = Math.round(BY + t * DY);
+      for (let y = top; y <= bot; y++) if (g[y]) g[y][x] = 'a';
     }
-    // 지붕면 (그늘 슬레이트) — 위=용마루, 아래=처마
-    for (let x = AX; x <= FX + 2; x++) {
-      const top = x <= RX ? lerp(APY, RY, (x - AX) / (RX - AX))
-                          : lerp(RY, FEY, (x - RX) / (FX + 2 - RX));
-      const bot = x <= NX ? lerp(APY, EY, (x - AX) / (NX - AX))
-                          : lerp(EY, FEY, (x - NX) / (FX + 2 - NX));
+    // 지붕면 — 평행사변형(위=용마루, 아래=처마)
+    for (let x = AX; x <= FX; x++) {
+      const top = x <= RX ? lerp(APY, RY, (x - AX) / DX)
+                          : lerp(RY, EY + DY, (x - RX) / (FX - RX));   // 먼 게이블 변
+      const bot = x <= NX ? lerp(APY, EY, (x - AX) / (NX - AX))        // 앞 게이블 변
+                          : lerp(EY, EY + DY, (x - NX) / DX);
       for (let y = Math.round(top); y <= Math.round(bot); y++) if (g[y]) g[y][x] = 'v';
     }
     // 정면 게이블 벽 + 몸통 (밝은 베이지)
-    for (let r = APY + 1; r <= EY; r++) {
-      const hw = Math.round((r - APY - 1) * 0.92);
+    for (let r = APY; r <= EY; r++) {
+      const hw = Math.round((r - APY) * (NX - AX) / (EY - APY));
       for (let c = AX - hw; c <= AX + hw; c++) if (c >= 0) g[r][c] = 'A';
     }
-    for (let r = EY; r <= BY; r++) for (let c = 3; c <= NX - 1; c++) g[r][c] = 'A';
+    for (let r = EY; r <= BY; r++) for (let c = 2; c <= NX; c++) g[r][c] = 'A';
     // 게이블 두 변의 지붕 마감 (밝은 면 · 처마 돌출)
-    for (let x = 1; x <= AX; x++) {
-      const y = Math.round(lerp(EY, APY, (x - 1) / (AX - 1)));
+    for (let x = 0; x <= AX; x++) {
+      const y = Math.round(lerp(EY + 2, APY, x / AX));
       for (let k = 0; k < 3; k++) if (g[y + k]) g[y + k][x] = 'V';
     }
     for (let x = AX; x <= NX + 1; x++) {
-      const y = Math.round(lerp(APY, EY, (x - AX) / (NX + 1 - AX)));
+      const y = Math.round(lerp(APY, EY + 1, (x - AX) / (NX + 1 - AX)));
       for (let k = 0; k < 3; k++) if (g[y + k]) g[y + k][x] = 'V';
     }
     outlineDir(g, ['A', 'a', 'V', 'v'], 22, 18, false);
@@ -446,17 +445,34 @@
       const t = e.touches ? e.touches[0] : e;
       if (!t) return;
       input.targetX = toVX(t.clientX);
+      glow(surface, t.clientX, true);
       e.preventDefault();
     };
+    const release = () => { input.targetX = null; glow(surface, 0, false); };
     surface.addEventListener('touchstart', onPointer, { passive: false });
     surface.addEventListener('touchmove', onPointer, { passive: false });
-    surface.addEventListener('touchend', () => { input.targetX = null; });
+    surface.addEventListener('touchend', release);
     surface.addEventListener('mousedown', (e) => { surface._drag = true; onPointer(e); });
     window.addEventListener('mousemove', (e) => { if (surface._drag) onPointer(e); });
-    window.addEventListener('mouseup', () => { surface._drag = false; input.targetX = null; });
+    window.addEventListener('mouseup', () => { if (surface._drag) { surface._drag = false; release(); } });
+  }
+  // 컨트롤 패드에서 손가락을 따라다니는 음영 — 지금 잡고 있는 위치가 보이게
+  function glow(surface, clientX, on) {
+    if (!el.pad || surface !== el.pad) return;
+    if (on) {
+      const r = el.pad.getBoundingClientRect();
+      el.pad.style.setProperty('--px', Math.round(((clientX - r.left) / r.width) * 100) + '%');
+    }
+    el.pad.style.setProperty('--pg', on ? '1' : '0');
+    el.pad.classList.toggle('touching', !!on);
   }
   bindDrag(canvas);
-  if (el.pad) bindDrag(el.pad);
+  if (el.pad) {
+    bindDrag(el.pad);
+    // 마우스로 그냥 지나가도 따라오게(데스크톱 재미 요소)
+    el.pad.addEventListener('mousemove', (e) => glow(el.pad, e.clientX, true));
+    el.pad.addEventListener('mouseleave', () => glow(el.pad, 0, false));
+  }
   el.btnStart.addEventListener('click', startGame);
   el.btnRetry.addEventListener('click', startGame);
 
@@ -614,18 +630,18 @@
     for (let x = 0; x < VW; x += 2) ctx.fillRect(x, y, 1, 1);
     for (let x = 1; x < VW; x += 2) ctx.fillRect(x, y + 1, 1, 1);
   }
-  // 흰색 목장 울타리 (기둥 + 가로 레일 2단) — yBase = 기둥이 땅에 닿는 선
-  function drawFence(yBase) {
-    const top = yBase - 15;
-    for (const ry of [top + 3, top + 9]) {          // 가로 레일 2단
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, ry, VW, 3);
-      ctx.fillStyle = '#bcccea'; ctx.fillRect(0, ry + 3, VW, 1);   // 레일 아래 그림자
-      ctx.fillStyle = '#26365e'; ctx.fillRect(0, ry - 1, VW, 1);   // 딥잉크 상단선
+  // 흰색 목장 울타리 — 얇게, 집 좌우 구간에만(지평선을 다 가리지 않는다).
+  function drawFence(yBase, x0, x1) {
+    const top = yBase - 12, w = x1 - x0;
+    for (const ry of [top + 2, top + 7]) {          // 가로 레일 2단 (얇게)
+      ctx.fillStyle = '#26365e'; ctx.fillRect(x0, ry - 1, w, 1);   // 딥잉크 상단선
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(x0, ry, w, 2);
+      ctx.fillStyle = '#bcccea'; ctx.fillRect(x0, ry + 2, w, 1);   // 레일 아래 그림자
     }
-    for (let x = 6; x < VW; x += 28) {              // 기둥
-      ctx.fillStyle = '#26365e'; ctx.fillRect(x - 1, top, 7, 16);
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(x, top + 1, 5, 15);
-      ctx.fillStyle = '#bcccea'; ctx.fillRect(x + 4, top + 1, 1, 15);
+    for (let x = x0 + 2; x < x1 - 2; x += 22) {     // 기둥 (얇게)
+      ctx.fillStyle = '#26365e'; ctx.fillRect(x - 1, top, 5, 13);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(x, top + 1, 3, 12);
+      ctx.fillStyle = '#bcccea'; ctx.fillRect(x + 2, top + 1, 1, 12);
     }
   }
 
@@ -649,13 +665,15 @@
       const h = 14 + Math.round(8 * Math.sin(x * 0.043 + 3.2));
       ctx.fillRect(x, hillTop - h, 1, h);
     }
-    // 사르르목장 건물 — 언덕 위(멀리). 울타리보다 위에 앉혀야 벽이 안 가린다.
-    drawSprite(HOUSE_SP, 148, hillTop - 42);
+    // 사르르목장 건물 — 언덕 위(멀리)
+    const hx = 140;
+    drawSprite(HOUSE_SP, hx, hillTop - 46);
     // 목초지 = CREAM + 딥잉크 룰(BI 그래픽 문법)
     ctx.fillStyle = '#fff6e6'; ctx.fillRect(0, hillTop, VW, GROUND);
     ctx.fillStyle = '#26365e'; ctx.fillRect(0, hillTop, VW, 3);
-    // 흰색 목장 울타리 — 지평선을 따라 (건물 앞을 가로지른다)
-    drawFence(hillTop);
+    // 흰 울타리 — 집 좌우로만 짧게
+    drawFence(hillTop, hx - 44, hx - 2);
+    drawFence(hillTop, hx + 48, VW - 4);
     // 브랜드 도트 패턴 (크림 위 스트로베리·스카이 도트) — 원근감 위해 아래로 갈수록 넓게
     for (let row = 0; row < 6; row++) {
       const yy = hillTop + 15 + row * 11;

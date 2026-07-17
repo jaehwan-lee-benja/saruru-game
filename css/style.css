@@ -204,6 +204,8 @@ html, body {
 
 /* ---- 컨트롤 패드 (모바일 · 엄지가 캐릭터를 가리지 않게 캔버스 아래) ---- */
 .pad {
+  position: relative;   /* ::before 음영의 기준 */
+  overflow: hidden;
   width: min(100%, 384px);
   height: 84px;
   flex: none;
@@ -220,6 +222,19 @@ html, body {
   background-position: center;
   background-repeat: no-repeat;
 }
+/* 손가락을 따라다니는 음영 — --px(위치) / --pg(세기)를 JS가 갱신한다 */
+.pad::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 30px at var(--px, 50%) 50%, var(--strawberry) 0%, transparent 70%),
+    radial-gradient(circle 62px at var(--px, 50%) 50%, var(--sky) 0%, transparent 75%);
+  opacity: var(--pg, 0);
+  transition: opacity 0.18s ease;
+  pointer-events: none;
+}
+.pad.touching { border-color: var(--navy); }
 .pad-hint {
   font-size: 10px;
   color: var(--navy);
@@ -227,7 +242,10 @@ html, body {
   padding: 3px 8px;
   letter-spacing: 1px;
   pointer-events: none;
+  position: relative;
+  transition: opacity 0.18s ease;
 }
+.pad.touching .pad-hint { opacity: 0; }
 .pad:active { box-shadow: 0 0 0 var(--sky); transform: translate(4px, 4px); }
 
 /* ---- 버그 신고 ---- */
