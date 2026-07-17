@@ -12,10 +12,13 @@
 (() => {
   'use strict';
 
-  const VW = 160, VH = 240;      // 가상(픽셀) 해상도 — 얼굴 마크(40px)가 화면의 25%
-  const GROUND = 64;
+  // 얼굴 마크는 BI 픽셀 마스터라 축소가 금지된다(비정수 배율 금지).
+  // 그래서 캐릭터를 줄이는 대신 "월드를 넓혔다" — 마스코트는 40px 그대로, 화면이 224px로
+  // 넓어져 화면 점유가 25% → 18%로 내려가고 피할 여유가 생긴다.
+  const VW = 224, VH = 336;
+  const GROUND = 90;
   const HILL_TOP = VH - GROUND;  // 목초지(크림) 시작선 — 언덕은 이 위로만
-  const PLAYER_Y = VH - 20;      // 마스코트 발밑 — 얼굴 마크 전체가 목초지 안에 들어온다
+  const PLAYER_Y = VH - 28;      // 마스코트 발밑 — 얼굴 마크 전체가 목초지 안에 들어온다
 
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
@@ -163,7 +166,10 @@
     }
   }
 
-  // --- 낙하 아이템 (BI 모자 3종 모티프를 아이템화 · 같은 그래픽 문법) ----
+  // --- 낙하 아이템 = 2단계뿐 (BI 모자 모티프 · 같은 그래픽 문법) -------------
+  //   tier0 우유팩  = 작고 수수한 크림/네이비 · 5점 · 반짝임 없음
+  //   tier1 딸기스쿱 = 확 크고 화려한 딸기핑크 · 20점 · 반짝임 + 진동
+  //   두 등급의 값어치가 크기·색·반짝임으로 한눈에 갈리게 한 것이 요점.
   function milkItem() { // tier0 — 우유팩
     const g = blank(14, 18);
     put(g, 0, 5, 'cccc'); put(g, 1, 4, 'cccccc');
@@ -173,40 +179,34 @@
     for (let r = 7; r < 11; r++) for (let c = 2; c < 12; c++) g[r][c] = 'L';
     outlineDir(g, ['c', 'y', 'Y', 'W', 'L'], 7, 9, false); despeckle(g); return g;
   }
-  function coneItem() { // tier1 — 소프트콘
-    const g = blank(15, 20);
-    discShade(g, 7, 6, 5.2, 5, ['W', 'W', 'e', 's', 'S']); put(g, 1, 6, 'WW');
-    for (let r = 11; r < 19; r++) {
-      const w = Math.max(0, Math.round((19 - r) * 0.72));
-      for (let c = 7 - w; c <= 7 + w; c++) g[r][c] = ((c - 7 + r) % 3 === 0) ? 'u' : 't';
-    }
-    outlineDir(g, ['W', 'e', 's', 'S', 't', 'u'], 7, 9, false); despeckle(g); return g;
-  }
-  function scoopItem() { // tier2 — 딸기 스쿱(최고득점)
-    const g = blank(16, 19);
-    discShade(g, 8, 6, 6, 5.4, ['p', 'P', 'P', 'Q', 'Q']); put(g, 1, 7, 'pp');
-    for (let r = 11; r < 18; r++) for (let c = 3; c < 13; c++) g[r][c] = 'c';   // 크림 컵
-    for (let r = 11; r < 18; r++) { g[r][3] = 'W'; g[r][11] = 'y'; g[r][12] = 'Y'; }
-    for (let c = 3; c < 13; c++) { g[12][c] = 'L'; g[13][c] = 'L'; }            // 네이비 밴드
-    outlineDir(g, ['p', 'P', 'Q', 'c', 'y', 'Y', 'W', 'L'], 8, 9, false); despeckle(g); return g;
+  function scoopItem() { // tier1 — 딸기 선데이(최고득점) · 우유팩보다 확실히 크게
+    const g = blank(24, 30);
+    discShade(g, 12, 9, 9.5, 8.5, ['p', 'P', 'P', 'Q', 'Q']);                   // 큼직한 딸기 스쿱
+    discShade(g, 12, 4, 4.5, 3, ['W', 'p', 'P']);                               // 위쪽 하이라이트
+    put(g, 1, 11, 'WW');
+    for (let r = 17; r < 28; r++) for (let c = 4; c < 20; c++) g[r][c] = 'c';   // 크림 컵
+    for (let r = 17; r < 28; r++) { g[r][4] = 'W'; g[r][5] = 'W'; g[r][18] = 'y'; g[r][19] = 'Y'; }
+    for (let r = 19; r < 23; r++) for (let c = 4; c < 20; c++) g[r][c] = 'L';   // 네이비 밴드
+    outlineDir(g, ['p', 'P', 'Q', 'c', 'y', 'Y', 'W', 'L'], 12, 14, false); despeckle(g); return g;
   }
   function poopItem() { // 장애물 — 능글맞지만 미워할 수 없게
-    const g = blank(15, 14);
-    discShade(g, 7, 10, 7, 3.6, ['h', 'B', 'B', 'b']);
-    discShade(g, 7, 6, 4.6, 3, ['h', 'B', 'B', 'b']);
-    discShade(g, 7, 3, 2.6, 2, ['h', 'B', 'b']);
-    disc(g, 5, 7, 1.1, 1.4, 'W'); disc(g, 9, 7, 1.1, 1.4, 'W');                 // 눈 흰자
-    put(g, 7, 5, 'K'); put(g, 7, 9, 'K');
-    put(g, 10, 6, 'K'); put(g, 10, 7, 'K'); put(g, 10, 8, 'K');                 // 입
-    outlineDir(g, ['B', 'b', 'h'], 7, 8, false); despeckle(g); return g;
+    const g = blank(19, 18);
+    discShade(g, 9, 13, 8.8, 4.4, ['h', 'B', 'B', 'b']);
+    discShade(g, 9, 8, 5.8, 3.8, ['h', 'B', 'B', 'b']);
+    discShade(g, 9, 4, 3.3, 2.6, ['h', 'B', 'b']);
+    disc(g, 6.5, 9, 1.4, 1.8, 'W'); disc(g, 11.5, 9, 1.4, 1.8, 'W');            // 눈 흰자
+    put(g, 9, 6, 'K'); put(g, 9, 12, 'K');
+    put(g, 13, 8, 'KKK');                                                        // 입
+    outlineDir(g, ['B', 'b', 'h'], 9, 10, false); despeckle(g); return g;
   }
 
   const CLOUD = [
-    '....WWWWWW....',
-    '..WWWWWWWWWW..',
-    '.WWWWWWWWWWWW.',
-    'WWWWWWWWWWWWWW',
-    'WWWWeeeessssWW',
+    '......WWWWWWWW......',
+    '...WWWWWWWWWWWWWW...',
+    '..WWWWWWWWWWWWWWWW..',
+    '.WWWWWWWWWWWWWWWWWW.',
+    'WWWWWWWWWWWWWWWWWWWW',
+    'WWWWWWeeeeeessssssWW',
   ];
 
   // ===== 스프라이트 생성(로드 시 1회) =====
@@ -215,7 +215,7 @@
   const HEAD_SP = S(faceMark('none'));                 // 얼굴(모자 없음)
   const HAT_SP = {}; HATS.forEach(k => { HAT_SP[k] = S(hatSprite(k)); });
   const FACE_SP = {}; HATS.forEach(k => { FACE_SP[k] = S(faceMark(k)); }); // 정지컷(선택 UI용)
-  const ITEM_SP = { milk: S(milkItem()), cone: S(coneItem()), scoop: S(scoopItem()), poop: S(poopItem()) };
+  const ITEM_SP = { milk: S(milkItem()), scoop: S(scoopItem()), poop: S(poopItem()) };
 
   const sizeOf = (sp) => ({ w: Math.max(...sp.map(r => r.length)), h: sp.length });
 
@@ -276,11 +276,15 @@
     if (!muted && navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
   }
   const SFX = {
+    // tier0 = 짧은 단음 / tier1 = 3음 아르페지오 + 진동(값어치가 손끝에도 느껴지게)
     collect(tier) {
-      const base = [660, 784, 988][tier] || 660;
+      const base = tier ? 880 : 660;
       blip(base, 0.09, 'square', 0.16);
-      if (tier >= 1) blip(base * 1.5, 0.08, 'square', 0.13, 0.06);
-      if (tier >= 2) { blip(base * 2, 0.09, 'square', 0.12, 0.12); vibe(14); }
+      if (tier >= 1) {
+        blip(base * 1.5, 0.08, 'square', 0.14, 0.06);
+        blip(base * 2, 0.10, 'square', 0.13, 0.12);
+        vibe(22);
+      }
     },
     hit() { noise(0.18, 0.2); slide(300, 80, 0.24, 'sawtooth', 0.16); vibe([0, 70, 40, 70]); },
     over() {
@@ -304,23 +308,22 @@
     });
   }
 
-  // ===== 낙하물 종류 (tier↑ = 고득점·큼·반짝임↑) =====
+  // ===== 낙하물 = 똥 + 점수 2단계뿐 (등급차가 크기·색·반짝임·점수로 드러난다) =====
   const KINDS = {
     poop:  { sp: ITEM_SP.poop,  good: false, tier: -1 },
     milk:  { sp: ITEM_SP.milk,  good: true, points: 5,  tier: 0, glow: '#eff4fc' },
-    cone:  { sp: ITEM_SP.cone,  good: true, points: 10, tier: 1, glow: '#fff6e6' },
-    scoop: { sp: ITEM_SP.scoop, good: true, points: 15, tier: 2, glow: '#ffd9e2' },
+    scoop: { sp: ITEM_SP.scoop, good: true, points: 20, tier: 1, glow: '#ffd9e2' },
   };
 
   // ===== 상태 =====
   let state = 'ready';
   let hat = localStorage.getItem(HAT_KEY);
   if (HATS.indexOf(hat) < 0) hat = 'milk';
-  const player = { x: VW / 2, w: 26, speed: 2.2, vx: 0 };
+  const player = { x: VW / 2, w: 26, speed: 3.1, vx: 0 };  // w=26 = 얼굴 코어(40px 전체 아님)
   let items = [];
   let sparks = [];
   let score = 0, lives = 3, elapsed = 0, spawnTimer = 0, invuln = 0, lastTime = 0;
-  const clouds = [{ x: 24, y: 30, s: 0.11 }, { x: 96, y: 16, s: 0.07 }, { x: 140, y: 46, s: 0.09 }];
+  const clouds = [{ x: 34, y: 42, s: 0.11 }, { x: 134, y: 22, s: 0.07 }, { x: 196, y: 64, s: 0.09 }];
   const input = { left: false, right: false, targetX: null };
 
   // ===== 모자(캐릭터) 선택 — BI 마스코트 라인업 =====
@@ -414,9 +417,8 @@
   function spawn() {
     const roll = Math.random();
     let kind;
-    if (roll < 0.10) kind = 'scoop';
-    else if (roll < 0.26) kind = 'cone';
-    else if (roll < 0.46) kind = 'milk';
+    if (roll < 0.12) kind = 'scoop';        // 귀함 = 20점
+    else if (roll < 0.46) kind = 'milk';    // 흔함 = 5점
     else kind = 'poop';
     const k = KINDS[kind];
     const sz = sizeOf(k.sp);
@@ -485,10 +487,10 @@
         if (it.good) {
           score += it.points;
           const t = it.tier;
-          addPopup(cx, PLAYER_Y - 46, '+' + it.points, ['#385088', '#a8763f', '#e07d94'][t] || '#e07d94', t >= 1);
-          burst(cx, cy, it.glow || '#ffffff', 6 + t * 5, 0.8 + t * 0.5);
-          burst(cx, cy, '#ffffff', 3 + t * 2, 0.5);
-          flash(it.glow, 0.10 + t * 0.06);
+          addPopup(cx, PLAYER_Y - 48, '+' + it.points, t ? '#e07d94' : '#385088', t >= 1);
+          burst(cx, cy, it.glow || '#ffffff', 6 + t * 10, 0.8 + t * 0.8);
+          burst(cx, cy, '#ffffff', 3 + t * 5, 0.5);
+          flash(it.glow, 0.10 + t * 0.12);
           SFX.collect(t);
         } else if (invuln <= 0) {
           lives -= 1; invuln = 1000;
@@ -524,31 +526,31 @@
     const hillTop = HILL_TOP;
     // 대기 원근: 위가 진한 SKY → 지평선이 밝게. (흰·크림 아이템이 낙하 중 대비를 얻는다)
     ctx.fillStyle = '#dfe7f6'; ctx.fillRect(0, 0, VW, hillTop);
-    ctx.fillStyle = '#cbd8ee'; ctx.fillRect(0, 0, VW, 122);
-    ctx.fillStyle = '#bcccea'; ctx.fillRect(0, 0, VW, 72);
-    dither(72, '#cbd8ee'); dither(74, '#cbd8ee');
-    dither(122, '#dfe7f6'); dither(124, '#dfe7f6');
+    ctx.fillStyle = '#cbd8ee'; ctx.fillRect(0, 0, VW, 170);
+    ctx.fillStyle = '#bcccea'; ctx.fillRect(0, 0, VW, 100);
+    dither(100, '#cbd8ee'); dither(102, '#cbd8ee');
+    dither(170, '#dfe7f6'); dither(172, '#dfe7f6');
     for (const cl of clouds) drawSprite(CLOUD, cl.x, cl.y);
     // 원경 언덕 2겹 (뒤 → 앞으로 진해짐)
     ctx.fillStyle = '#a7bce2';
     for (let x = 0; x < VW; x++) {
-      const h = 20 + Math.round(9 * Math.sin(x * 0.035 + 1.5) + 5 * Math.sin(x * 0.09));
+      const h = 28 + Math.round(13 * Math.sin(x * 0.025 + 1.5) + 7 * Math.sin(x * 0.065));
       ctx.fillRect(x, hillTop - h, 1, h);
     }
     ctx.fillStyle = '#8fa8d4';
     for (let x = 0; x < VW; x++) {
-      const h = 10 + Math.round(6 * Math.sin(x * 0.06 + 3.2));
+      const h = 14 + Math.round(8 * Math.sin(x * 0.043 + 3.2));
       ctx.fillRect(x, hillTop - h, 1, h);
     }
     // 목초지 = CREAM + 딥잉크 룰 + 점선 룰(BI 그래픽 문법)
     ctx.fillStyle = '#fff6e6'; ctx.fillRect(0, hillTop, VW, GROUND);
-    ctx.fillStyle = '#26365e'; ctx.fillRect(0, hillTop, VW, 2);
+    ctx.fillStyle = '#26365e'; ctx.fillRect(0, hillTop, VW, 3);
     ctx.fillStyle = '#385088';
-    for (let x = 0; x < VW; x += 4) ctx.fillRect(x, hillTop + 5, 2, 1);
+    for (let x = 0; x < VW; x += 6) ctx.fillRect(x, hillTop + 7, 3, 1);
     // 브랜드 도트 패턴 (크림 위 스트로베리·스카이 도트) — 원근감 위해 아래로 갈수록 넓게
-    for (let row = 0; row < 5; row++) {
-      const yy = hillTop + 11 + row * 8;
-      const step = 14 + row * 2;
+    for (let row = 0; row < 6; row++) {
+      const yy = hillTop + 15 + row * 11;
+      const step = 20 + row * 3;
       for (let x = 4 + (row % 2 ? step / 2 : 0); x < VW; x += step) {
         const alt = (row + ((x / step) | 0)) % 2;
         ctx.fillStyle = alt ? '#f4a9b8' : '#bcccea';

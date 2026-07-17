@@ -97,7 +97,7 @@ html, body {
   position: relative;
   width: 100%;
   max-width: 384px;
-  aspect-ratio: 160 / 240;
+  aspect-ratio: 224 / 336;
   border: 4px solid var(--ink);
   box-shadow: 6px 6px 0 var(--sky);
   background: var(--sky);
