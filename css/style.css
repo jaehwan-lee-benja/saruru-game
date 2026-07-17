@@ -222,17 +222,26 @@ html, body {
   background-position: center;
   background-repeat: no-repeat;
 }
-/* 손가락을 따라다니는 음영 — --px(위치) / --pg(세기)를 JS가 갱신한다 */
-.pad::before {
-  content: '';
+/* 손가락을 따라다니는 음영 — 픽셀 컨셉:
+   부드러운 그라데이션이 아니라 하드엣지 정사각형이 계단식으로 퍼진다(box-shadow spread).
+   위치(--px)는 JS가 8px 그리드에 스냅해서 넣으므로 이동도 뚝뚝 끊긴다. */
+.pad-glow {
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle 30px at var(--px, 50%) 50%, var(--strawberry) 0%, transparent 70%),
-    radial-gradient(circle 62px at var(--px, 50%) 50%, var(--sky) 0%, transparent 75%);
+  top: 50%;
+  left: var(--px, 50%);
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  background: var(--berry);
   opacity: var(--pg, 0);
-  transition: opacity 0.18s ease;
+  transition: opacity 0.12s steps(2);
   pointer-events: none;
+  box-shadow:
+    0 0 0 5px var(--strawberry),
+    0 0 0 10px #ffd9e2,
+    0 0 0 15px var(--sky),
+    0 0 0 20px #d6e0f1,
+    0 0 0 25px var(--sky-soft);
 }
 .pad.touching { border-color: var(--navy); }
 .pad-hint {

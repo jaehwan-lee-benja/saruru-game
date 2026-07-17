@@ -221,43 +221,46 @@
   // --- 배경: 실제 사르르목장 건물(포천 산정호수로 130)을 픽셀로 귀엽게 ------
   // 실물 특징: 단층 · 박공지붕(진회색 금속) · 베이지 벽돌 벽 · 게이블 면에 큰 네이비 젖소
   // 엠블럼 · 오른쪽 통창 입구. 베이지 벽은 BI 크림 램프(c/y/Y)와 그대로 맞아떨어진다.
-  // 레퍼런스 구조: 게이블 정면(왼쪽) + 오른쪽으로 길게 내려오는 지붕면 + 측면 벽.
-  // ★처마선과 바닥선은 수평으로 나란하다 — 측면은 직사각형. 기우는 건 지붕 슬로프뿐.
+  // 실제 목장 건물 = 게이블이 앞을 보고 용마루가 뒤로 길게 뻗은 단층.
+  // ★수평선 3개가 나란하다: 용마루(위) · 처마(중간) · 바닥(아래).
+  //   기우는 건 앞뒤 게이블의 두 변뿐이고, 그 둘도 서로 나란하다(평행 투영).
+  //   측면 벽은 직사각형. 지붕면은 용마루~처마 사이의 평행사변형.
   function farmHouse() {
-    const g = blank(48, 34);
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const AX = 13, APY = 3;      // 지붕 꼭지
-    const EY = 17, BY = 31;      // 처마선 · 바닥선 (둘 다 수평)
-    const LX = 1, RX = 45;       // 지붕 좌우 끝 (처마 돌출)
-    const NX = 24;               // 정면/측면이 만나는 모서리
+    const g = blank(54, 34);
+    const AX = 13, APY = 3;       // 앞 게이블 꼭지 = 용마루 왼쪽 끝
+    const EY = 17, BY = 31;       // 처마선 · 바닥선
+    const LX = 2, NX = 24;        // 정면 왼쪽 끝 · 정면/측면 모서리
+    const RUN = 27;               // 용마루 길이(뒤로 물러나는 만큼)
+    const SHEAR = NX - AX;        // 게이블 변의 x 이동량 — 앞뒤 게이블이 나란하다
+    const WALL_R = 49;            // 측면 벽 오른쪽 끝(지붕이 조금 돌출)
 
-    // 지붕 — 꼭지에서 좌우로 내려오는 슬로프, 아래는 수평 처마선
-    for (let x = LX; x <= RX; x++) {
-      const y = x <= AX ? lerp(EY, APY, (x - LX) / (AX - LX))
-                        : lerp(APY, EY, (x - AX) / (RX - AX));
-      for (let yy = Math.round(y); yy <= EY; yy++) g[yy][x] = 'v';
+    // 지붕면 — 위=용마루(수평), 아래=처마(수평), 좌우 변은 나란한 게이블 변
+    for (let y = APY; y <= EY; y++) {
+      const t = (y - APY) / (EY - APY);
+      const xL = Math.round(AX + t * SHEAR), xR = Math.round(AX + RUN + t * SHEAR);
+      for (let x = xL; x <= xR; x++) if (x < 54) g[y][x] = 'v';
     }
-    // 정면 게이블 벽 (밝은 베이지) — 지붕 삼각형 안쪽
-    for (let r = APY; r <= EY; r++) {
-      const hw = Math.round((r - APY) * (NX - AX) / (EY - APY));
-      for (let c = AX - hw; c <= AX + hw; c++) if (c >= 0) g[r][c] = 'A';
+    // 측면 벽 — 직사각형(위=처마, 아래=바닥)
+    for (let y = EY; y <= BY; y++) for (let x = NX; x <= WALL_R; x++) g[y][x] = 'a';
+    // 앞 게이블 삼각형 + 정면 벽 (밝은 베이지)
+    for (let y = APY; y <= EY; y++) {
+      const hw = Math.round(((y - APY) / (EY - APY)) * SHEAR);
+      for (let x = AX - hw; x <= AX + hw; x++) if (x >= 0) g[y][x] = 'A';
     }
-    // 벽 — 정면(밝음) + 측면(그늘). 위아래 모두 수평.
-    for (let r = EY; r <= BY; r++) {
-      for (let c = 2; c <= NX; c++) g[r][c] = 'A';
-      for (let c = NX + 1; c <= 43; c++) g[r][c] = 'a';
+    for (let y = EY; y <= BY; y++) for (let x = LX; x <= NX; x++) g[y][x] = 'A';
+    // 정면/지붕이 만나는 모서리 = 앞 게이블 오른쪽 변 (잉크선)
+    for (let y = APY; y <= EY; y++) {
+      const x = Math.round(AX + ((y - APY) / (EY - APY)) * SHEAR);
+      if (g[y][x]) g[y][x] = 'D';
     }
-    // 게이블 오른쪽 변 = 정면/지붕이 만나는 모서리 (잉크선으로 또렷하게)
-    for (let x = AX; x <= NX; x++) {
-      const y = Math.round(lerp(APY, EY, (x - AX) / (NX - AX)));
-      if (g[y]) g[y][x] = 'D';
+    // 앞 게이블 왼쪽 변 지붕 마감(밝은 면 · 처마 돌출)
+    for (let y = APY; y <= EY; y++) {
+      const x = Math.round(AX - ((y - APY) / (EY - APY)) * SHEAR);
+      for (let k = 0; k < 3; k++) if (x - k >= 0) g[y][x - k] = 'V';
     }
-    // 게이블 왼쪽 변 지붕 마감 (밝은 면)
-    for (let x = LX; x <= AX; x++) {
-      const y = Math.round(lerp(EY, APY, (x - LX) / (AX - LX)));
-      for (let k = 0; k < 3; k++) if (g[y + k]) g[y + k][x] = 'V';
-    }
-    outlineDir(g, ['A', 'a', 'V', 'v'], 22, 18, false);
+    // 용마루 마감(수평 하이라이트)
+    for (let x = AX; x <= AX + RUN; x++) g[APY][x] = 'V';
+    outlineDir(g, ['A', 'a', 'V', 'v', 'D'], 24, 18, false);
     despeckle(g); return g;
   }
 
@@ -455,7 +458,9 @@
     if (!el.pad || surface !== el.pad) return;
     if (on) {
       const r = el.pad.getBoundingClientRect();
-      el.pad.style.setProperty('--px', Math.round(((clientX - r.left) / r.width) * 100) + '%');
+      // 8px 그리드에 스냅 — 픽셀 컨셉이라 음영도 뚝뚝 끊겨 움직인다
+      const snapped = Math.round((clientX - r.left) / 8) * 8;
+      el.pad.style.setProperty('--px', Math.max(0, Math.min(r.width, snapped)) + 'px');
     }
     el.pad.style.setProperty('--pg', on ? '1' : '0');
     el.pad.classList.toggle('touching', !!on);
@@ -659,15 +664,15 @@
       const h = 14 + Math.round(8 * Math.sin(x * 0.043 + 3.2));
       ctx.fillRect(x, hillTop - h, 1, h);
     }
-    // 사르르목장 건물 — 언덕 위(멀리)
-    const hx = 140;
-    drawSprite(HOUSE_SP, hx, hillTop - 46);
+    // 사르르목장 건물 — 바닥이 지평선에 닿게(땅에 서 있다)
+    const hx = 136, hw = sizeOf(HOUSE_SP).w, hh = sizeOf(HOUSE_SP).h;
+    drawSprite(HOUSE_SP, hx, hillTop - hh);
     // 목초지 = CREAM + 딥잉크 룰(BI 그래픽 문법)
     ctx.fillStyle = '#fff6e6'; ctx.fillRect(0, hillTop, VW, GROUND);
     ctx.fillStyle = '#26365e'; ctx.fillRect(0, hillTop, VW, 3);
-    // 흰 울타리 — 집 좌우로만 짧게
-    drawFence(hillTop, hx - 44, hx - 2);
-    drawFence(hillTop, hx + 48, VW - 4);
+    // 흰 울타리 — 집을 피해서 나머지 전 구간에 이어진다(집을 가리지 않는다)
+    drawFence(hillTop, 0, hx);
+    drawFence(hillTop, hx + hw - 4, VW);
     // 브랜드 도트 패턴 (크림 위 스트로베리·스카이 도트) — 원근감 위해 아래로 갈수록 넓게
     for (let row = 0; row < 6; row++) {
       const yy = hillTop + 15 + row * 11;
