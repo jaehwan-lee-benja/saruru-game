@@ -15,7 +15,10 @@
   <div id="app">
     <header class="topbar">
       <img class="brand-logo" src="./assets/logo.png" alt="사르르목장" />
-      <button id="btn-mute" class="mute-btn" aria-label="소리 켜기/끄기" title="소리">🔊</button>
+      <div class="topbar-btns">
+        <button id="btn-pause" class="icon-btn" aria-label="일시정지" title="일시정지">⏸</button>
+        <button id="btn-mute" class="icon-btn" aria-label="소리 켜기/끄기" title="소리">🔊</button>
+      </div>
     </header>
 
     <main class="stage-wrap">
@@ -58,14 +61,48 @@
             <button id="btn-retry" class="btn btn-primary">↻ RETRY</button>
           </div>
         </div>
+
+        <!-- 일시정지 화면 -->
+        <div id="overlay-pause" class="overlay hidden">
+          <div class="card">
+            <h1>일시정지</h1>
+            <p class="lead">점수는 그대로 있어요.<br />천천히 다녀오세요!</p>
+            <button id="btn-resume" class="btn btn-primary">▶ 계속하기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 컨트롤 패드 — 캐릭터 아래라 엄지가 화면을 가리지 않는다 -->
+      <div id="pad" class="pad" role="slider" aria-label="좌우 이동 컨트롤">
+        <span class="pad-hint">◀ 여기를 좌우로 드래그 ▶</span>
       </div>
     </main>
 
     <footer class="footer">
       <span>사르르목장 · FRESH MILK ICE CREAM</span>
+      <button id="btn-bug" class="bug-btn" type="button">🐞 버그 신고</button>
     </footer>
   </div>
 
+  <!-- 버그 신고 -->
+  <div id="bug-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>🐞 버그 신고</h2>
+      <p class="modal-lead">이상한 점을 알려주세요. 어떤 상황이었는지 적어주시면 큰 도움이 됩니다.</p>
+      <textarea id="bug-text" rows="5" placeholder="예: 게임오버 후 다시 시작했더니 처음부터 너무 빨라요"></textarea>
+      <details class="bug-info">
+        <summary>함께 보내는 정보</summary>
+        <pre id="bug-meta"></pre>
+      </details>
+      <div class="modal-btns">
+        <button id="bug-cancel" class="btn btn-ghost" type="button">취소</button>
+        <button id="bug-send" class="btn btn-primary" type="button">보내기</button>
+      </div>
+      <p id="bug-msg" class="bug-msg"></p>
+    </div>
+  </div>
+
   <script src="./js/game.js"></script>
+  <script src="./js/bug-report.js"></script>
 </body>
 </html>

@@ -35,7 +35,11 @@
     btnStart: document.getElementById('btn-start'),
     btnRetry: document.getElementById('btn-retry'),
     btnMute: document.getElementById('btn-mute'),
+    btnPause: document.getElementById('btn-pause'),
+    btnResume: document.getElementById('btn-resume'),
+    pause: document.getElementById('overlay-pause'),
     hatPick: document.getElementById('hat-pick'),
+    pad: document.getElementById('pad'),
   };
 
   const BEST_KEY = 'saruru.ddong.best';
@@ -116,6 +120,8 @@
     t: '#f4d9a2', u: '#dcb873',                                // 와플콘
     // 게임 전용(BI 팔레트와 조화되게 톤 맞춤)
     B: '#a8763f', b: '#754c26', h: '#c9975c',                  // 소똥
+    V: '#5a6b93', v: '#3d4a6d',                                // 목장 건물 지붕(진회색 슬레이트)
+    A: '#e9ddc2', a: '#cfc0a0', z: '#b3a486',                  // 목장 건물 벽(베이지 벽돌 · 정면/측면/줄눈)
   };
 
   // --- 얼굴 마크 (BI 확정 마스코트) -------------------------------------
@@ -167,27 +173,43 @@
   }
 
   // --- 낙하 아이템 = 2단계뿐 (BI 모자 모티프 · 같은 그래픽 문법) -------------
-  //   tier0 우유팩  = 작고 수수한 크림/네이비 · 5점 · 반짝임 없음
-  //   tier1 딸기스쿱 = 확 크고 화려한 딸기핑크 · 20점 · 반짝임 + 진동
+  //   tier0 유리 우유병 = 작고 수수한 흰/스카이 유리 · 5점 · 반짝임 없음
+  //   tier1 소프트콘    = 확 크고 화려한 스월 + 와플콘 + 딸기 · 20점 · 반짝임 + 진동
   //   두 등급의 값어치가 크기·색·반짝임으로 한눈에 갈리게 한 것이 요점.
-  function milkItem() { // tier0 — 우유팩
-    const g = blank(14, 18);
-    put(g, 0, 5, 'cccc'); put(g, 1, 4, 'cccccc');
-    for (let r = 2; r < 17; r++) for (let c = 2; c < 12; c++) g[r][c] = 'c';
-    for (let r = 2; r < 17; r++) { g[r][2] = 'W'; g[r][3] = 'W'; g[r][10] = 'y'; g[r][11] = 'Y'; }
-    // 라벨 = 네이비 밴드(BI 모자의 우유팩과 동일 문법 — 작은 마크는 이 크기에서 뭉개진다)
-    for (let r = 7; r < 11; r++) for (let c = 2; c < 12; c++) g[r][c] = 'L';
-    outlineDir(g, ['c', 'y', 'Y', 'W', 'L'], 7, 9, false); despeckle(g); return g;
+  function milkItem() { // tier0 — 유리 우유병(목장 우유병)
+    const g = blank(14, 21);
+    // 네이비 뚜껑 + 목테
+    for (let r = 0; r < 3; r++) for (let c = 5; c < 9; c++) g[r][c] = 'L';
+    for (let c = 4; c < 10; c++) g[3][c] = 'L';
+    // 목 → 어깨 → 몸통 (유리병 실루엣)
+    for (let r = 4; r < 7; r++) for (let c = 5; c < 9; c++) g[r][c] = 'W';
+    for (let c = 4; c < 10; c++) g[7][c] = 'W';
+    for (let c = 3; c < 11; c++) g[8][c] = 'W';
+    for (let r = 9; r < 20; r++) for (let c = 2; c < 12; c++) g[r][c] = 'W';
+    // 유리 = 우유 위 빈 공간(스카이 톤) + 오른쪽 유리 그림자 + 왼쪽 하이라이트
+    for (let r = 4; r < 9; r++) for (let c = 5; c < 9; c++) g[r][c] = 's';
+    for (let r = 9; r < 11; r++) for (let c = 3; c < 11; c++) g[r][c] = 's';
+    for (let r = 9; r < 20; r++) { g[r][10] = 's'; g[r][11] = 'S'; }
+    for (let r = 11; r < 19; r++) g[r][3] = 'W';
+    outlineDir(g, ['W', 's', 'S', 'L'], 7, 11, false); despeckle(g); return g;
   }
-  function scoopItem() { // tier1 — 딸기 선데이(최고득점) · 우유팩보다 확실히 크게
-    const g = blank(24, 30);
-    discShade(g, 12, 9, 9.5, 8.5, ['p', 'P', 'P', 'Q', 'Q']);                   // 큼직한 딸기 스쿱
-    discShade(g, 12, 4, 4.5, 3, ['W', 'p', 'P']);                               // 위쪽 하이라이트
+  function scoopItem() { // tier1 — 소프트콘 아이스크림(최고득점) · 우유병보다 확실히 크게
+    const g = blank(24, 32);
+    // 소프트서브 스월 = 위로 갈수록 작아지는 디스크 3단 + 뾰족한 꼭지
+    discShade(g, 12, 16, 8.5, 5, ['W', 'W', 'e', 's', 'S']);
+    discShade(g, 12, 11, 6.5, 4, ['W', 'W', 'e', 's', 'S']);
+    discShade(g, 12, 7, 4.5, 3.2, ['W', 'W', 'e', 's']);
+    discShade(g, 12, 4, 2.4, 2, ['W', 'W', 'e']);
     put(g, 1, 11, 'WW');
-    for (let r = 17; r < 28; r++) for (let c = 4; c < 20; c++) g[r][c] = 'c';   // 크림 컵
-    for (let r = 17; r < 28; r++) { g[r][4] = 'W'; g[r][5] = 'W'; g[r][18] = 'y'; g[r][19] = 'Y'; }
-    for (let r = 19; r < 23; r++) for (let c = 4; c < 20; c++) g[r][c] = 'L';   // 네이비 밴드
-    outlineDir(g, ['p', 'P', 'Q', 'c', 'y', 'Y', 'W', 'L'], 12, 14, false); despeckle(g); return g;
+    // 딸기 한 알(브랜드 포인트 · 프리미엄 신호)
+    discShade(g, 17, 6, 2.6, 2.2, ['p', 'P', 'Q']);
+    // 와플콘 — 격자 무늬
+    for (let r = 20; r < 31; r++) {
+      const w = Math.max(0, Math.round((31 - r) * 0.78));
+      for (let c = 12 - w; c <= 12 + w; c++) g[r][c] = ((c - 12 + r) % 3 === 0) ? 'u' : 't';
+    }
+    outlineDir(g, ['W', 'e', 's', 'S', 't', 'u', 'p', 'P', 'Q'], 12, 15, false);
+    despeckle(g); return g;
   }
   function poopItem() { // 장애물 — 능글맞지만 미워할 수 없게
     const g = blank(19, 18);
@@ -198,6 +220,25 @@
     put(g, 9, 6, 'K'); put(g, 9, 12, 'K');
     put(g, 13, 8, 'KKK');                                                        // 입
     outlineDir(g, ['B', 'b', 'h'], 9, 10, false); despeckle(g); return g;
+  }
+
+  // --- 배경: 실제 사르르목장 건물(포천 산정호수로 130)을 픽셀로 귀엽게 ------
+  // 실물 특징: 단층 · 박공지붕(진회색 금속) · 베이지 벽돌 벽 · 게이블 면에 큰 네이비 젖소
+  // 엠블럼 · 오른쪽 통창 입구. 베이지 벽은 BI 크림 램프(c/y/Y)와 그대로 맞아떨어진다.
+  // 심플하게 "느낌만" — 정면 박공(삼각) 지붕 + 베이지 벽. 투시·엠블럼·창문 없음.
+  function farmHouse() {
+    const g = blank(46, 32);
+    const AX = 22, APY = 2, EY = 17, BY = 30;   // 꼭지 · 처마선 · 바닥선
+    // 박공지붕 (진회색 슬레이트) — 채운 삼각형, 처마가 벽보다 돌출
+    for (let r = APY; r <= EY; r++) {
+      const hw = Math.round((r - APY) * 1.35);
+      for (let c = AX - hw; c <= AX + hw; c++) if (c >= 0 && c < 46) g[r][c] = c < AX ? 'V' : 'v';
+    }
+    // 베이지 벽
+    for (let r = EY + 1; r <= BY; r++) for (let c = 6; c <= 39; c++) g[r][c] = 'A';
+    for (let r = EY + 1; r <= BY; r++) { g[r][38] = 'a'; g[r][39] = 'a'; }   // 오른쪽 면 그늘
+    outlineDir(g, ['A', 'a', 'V', 'v'], 22, 18, false);
+    despeckle(g); return g;
   }
 
   const CLOUD = [
@@ -216,6 +257,7 @@
   const HAT_SP = {}; HATS.forEach(k => { HAT_SP[k] = S(hatSprite(k)); });
   const FACE_SP = {}; HATS.forEach(k => { FACE_SP[k] = S(faceMark(k)); }); // 정지컷(선택 UI용)
   const ITEM_SP = { milk: S(milkItem()), scoop: S(scoopItem()), poop: S(poopItem()) };
+  const HOUSE_SP = S(farmHouse());
 
   const sizeOf = (sp) => ({ w: Math.max(...sp.map(r => r.length)), h: sp.length });
 
@@ -312,7 +354,7 @@
   const KINDS = {
     poop:  { sp: ITEM_SP.poop,  good: false, tier: -1 },
     milk:  { sp: ITEM_SP.milk,  good: true, points: 5,  tier: 0, glow: '#eff4fc' },
-    scoop: { sp: ITEM_SP.scoop, good: true, points: 20, tier: 1, glow: '#ffd9e2' },
+    scoop: { sp: ITEM_SP.scoop, good: true, points: 20, tier: 1, glow: '#fff6e6' },
   };
 
   // ===== 상태 =====
@@ -366,23 +408,28 @@
     if (e.key === 'ArrowLeft' || e.key === 'a') input.left = false;
     else if (e.key === 'ArrowRight' || e.key === 'd') input.right = false;
   });
-  function toVX(clientX) {
-    const r = canvas.getBoundingClientRect();
-    return ((clientX - r.left) / r.width) * VW;
+  // 캔버스와 컨트롤 패드 둘 다 조작면. 패드는 캐릭터 아래라 엄지가 화면을 안 가린다.
+  function bindDrag(surface) {
+    const toVX = (clientX) => {
+      const r = surface.getBoundingClientRect();
+      return ((clientX - r.left) / r.width) * VW;
+    };
+    const onPointer = (e) => {
+      if (state !== 'playing') return;
+      const t = e.touches ? e.touches[0] : e;
+      if (!t) return;
+      input.targetX = toVX(t.clientX);
+      e.preventDefault();
+    };
+    surface.addEventListener('touchstart', onPointer, { passive: false });
+    surface.addEventListener('touchmove', onPointer, { passive: false });
+    surface.addEventListener('touchend', () => { input.targetX = null; });
+    surface.addEventListener('mousedown', (e) => { surface._drag = true; onPointer(e); });
+    window.addEventListener('mousemove', (e) => { if (surface._drag) onPointer(e); });
+    window.addEventListener('mouseup', () => { surface._drag = false; input.targetX = null; });
   }
-  function onPointer(e) {
-    if (state !== 'playing') return;
-    const t = e.touches ? e.touches[0] : e;
-    if (!t) return;
-    input.targetX = toVX(t.clientX);
-    e.preventDefault();
-  }
-  canvas.addEventListener('touchstart', onPointer, { passive: false });
-  canvas.addEventListener('touchmove', onPointer, { passive: false });
-  canvas.addEventListener('touchend', () => { input.targetX = null; });
-  canvas.addEventListener('mousedown', (e) => { canvas._drag = true; onPointer(e); });
-  window.addEventListener('mousemove', (e) => { if (canvas._drag) onPointer(e); });
-  window.addEventListener('mouseup', () => { canvas._drag = false; input.targetX = null; });
+  bindDrag(canvas);
+  if (el.pad) bindDrag(el.pad);
   el.btnStart.addEventListener('click', startGame);
   el.btnRetry.addEventListener('click', startGame);
 
@@ -390,7 +437,8 @@
   function startGame() {
     state = 'playing';
     items = []; sparks = [];
-    score = 0; lives = 3; spawnTimer = 0; invuln = 0;
+    // playT = 난이도 시계. 이걸 안 지우면 재시작해도 이전 판의 속도가 그대로 넘어온다.
+    score = 0; lives = 3; spawnTimer = 0; invuln = 0; playT = 0;
     player.x = VW / 2; player.vx = 0;
     input.targetX = null;
     el.start.classList.add('hidden');
@@ -399,6 +447,23 @@
     SFX.start();
     updateHud();
   }
+  // 일시정지 — 점수는 그대로 메모리에 남는다(기록이 사라지지 않는다).
+  function setPaused(p) {
+    if (p && state !== 'playing') return;
+    if (!p && state !== 'paused') return;
+    state = p ? 'paused' : 'playing';
+    input.left = input.right = false; input.targetX = null;
+    el.pause.classList.toggle('hidden', !p);
+    if (el.btnPause) el.btnPause.textContent = p ? '▶' : '⏸';
+  }
+  if (el.btnPause) el.btnPause.addEventListener('click', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    setPaused(state === 'playing');
+  });
+  if (el.btnResume) el.btnResume.addEventListener('click', () => setPaused(false));
+  // 탭을 벗어나면 자동 일시정지 — 안 그러면 돌아왔을 때 이미 죽어 있다
+  document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); });
+
   function gameOver() {
     state = 'over';
     const fs = Math.floor(score);
@@ -522,6 +587,21 @@
     for (let x = 0; x < VW; x += 2) ctx.fillRect(x, y, 1, 1);
     for (let x = 1; x < VW; x += 2) ctx.fillRect(x, y + 1, 1, 1);
   }
+  // 흰색 목장 울타리 (기둥 + 가로 레일 2단) — yBase = 기둥이 땅에 닿는 선
+  function drawFence(yBase) {
+    const top = yBase - 15;
+    for (const ry of [top + 3, top + 9]) {          // 가로 레일 2단
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, ry, VW, 3);
+      ctx.fillStyle = '#bcccea'; ctx.fillRect(0, ry + 3, VW, 1);   // 레일 아래 그림자
+      ctx.fillStyle = '#26365e'; ctx.fillRect(0, ry - 1, VW, 1);   // 딥잉크 상단선
+    }
+    for (let x = 6; x < VW; x += 28) {              // 기둥
+      ctx.fillStyle = '#26365e'; ctx.fillRect(x - 1, top, 7, 16);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(x, top + 1, 5, 15);
+      ctx.fillStyle = '#bcccea'; ctx.fillRect(x + 4, top + 1, 1, 15);
+    }
+  }
+
   function drawBackground() {
     const hillTop = HILL_TOP;
     // 대기 원근: 위가 진한 SKY → 지평선이 밝게. (흰·크림 아이템이 낙하 중 대비를 얻는다)
@@ -542,11 +622,13 @@
       const h = 14 + Math.round(8 * Math.sin(x * 0.043 + 3.2));
       ctx.fillRect(x, hillTop - h, 1, h);
     }
-    // 목초지 = CREAM + 딥잉크 룰 + 점선 룰(BI 그래픽 문법)
+    // 사르르목장 건물 — 언덕 위(멀리). 울타리보다 위에 앉혀야 벽이 안 가린다.
+    drawSprite(HOUSE_SP, 148, hillTop - 42);
+    // 목초지 = CREAM + 딥잉크 룰(BI 그래픽 문법)
     ctx.fillStyle = '#fff6e6'; ctx.fillRect(0, hillTop, VW, GROUND);
     ctx.fillStyle = '#26365e'; ctx.fillRect(0, hillTop, VW, 3);
-    ctx.fillStyle = '#385088';
-    for (let x = 0; x < VW; x += 6) ctx.fillRect(x, hillTop + 7, 3, 1);
+    // 흰색 목장 울타리 — 지평선을 따라 (건물 앞을 가로지른다)
+    drawFence(hillTop);
     // 브랜드 도트 패턴 (크림 위 스트로베리·스카이 도트) — 원근감 위해 아래로 갈수록 넓게
     for (let row = 0; row < 6; row++) {
       const yy = hillTop + 15 + row * 11;
@@ -600,8 +682,9 @@
     for (let k = 0; k <= n; k++) {
       const tw = Math.sin(ph + k * 2.1);
       if (tw < 0.3) continue;
-      const cxp = Math.round(it.x + (k === 0 ? it.w - 2 : 1) + Math.sin(it.sway) * it.swayA);
-      const cyp = Math.round(it.y + (k === 0 ? 1 : it.h - 3));
+      // 스프라이트 윗부분(소프트서브 스월) 근처에 찍는다 — 아래는 콘이라 빈 공간이다
+      const cxp = Math.round(it.x + (k === 0 ? it.w - 4 : 3) + Math.sin(it.sway) * it.swayA);
+      const cyp = Math.round(it.y + (k === 0 ? 3 : 9));
       ctx.globalAlpha = Math.min(1, (tw - 0.3) / 0.7);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(cxp, cyp, 1, 1);
@@ -648,7 +731,7 @@
   }
 
   // 아트 검수·대시보드 프리뷰용 — 생성된 BI 스프라이트를 그대로 노출(읽기 전용 용도)
-  window.SaruruGameArt = { PAL, HEAD_SP, HAT_SP, FACE_SP, ITEM_SP };
+  window.SaruruGameArt = { PAL, HEAD_SP, HAT_SP, FACE_SP, ITEM_SP, HOUSE_SP };
 
   function loop(now) {
     if (!lastTime) lastTime = now;
