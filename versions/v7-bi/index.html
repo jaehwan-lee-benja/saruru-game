@@ -25,7 +25,7 @@
         </div>
         <div class="hud-item lives">
           <span class="hud-label">목숨</span>
-          <span id="lives" class="hud-value">♥♥♥</span>
+          <span id="lives" class="hud-value">♥♥</span>
         </div>
         <button id="btn-pause" class="hud-item hud-btn" type="button" aria-label="일시정지">
           <span class="hud-label">일시정지</span>
@@ -103,7 +103,7 @@
     <!-- 하단 유틸 바 — 로그인 · 소리 · 버그신고 한 줄 -->
     <div class="util-bar">
       <button id="btn-login" class="util-btn" type="button" aria-label="로그인">로그인</button>
-      <span id="who" class="who" hidden></span>
+      <button id="who" class="who" type="button" hidden aria-label="닉네임 변경" title="닉네임 변경"></button>
       <button id="btn-rank" class="util-btn" type="button">🏆 랭킹</button>
       <button id="btn-mute" class="util-btn icon" type="button" aria-label="소리 켜기/끄기" title="소리">🔊</button>
       <button id="btn-bug" class="util-btn" type="button">🐞 버그 신고</button>
@@ -111,7 +111,7 @@
 
     <!-- 워드마크 로고 (design 제공 · 오동통 아웃라인 에셋 · 네이비 #38528a) -->
     <div class="wordmark" aria-label="사르르목장">
-      <img src="./assets/saruru-wordmark.png?v=20260718e" alt="사르르목장" class="wordmark-img" />
+      <img src="./assets/saruru-wordmark.png?v=20260718f" alt="사르르목장" class="wordmark-img" />
     </div>
     <footer class="footer">
       <span>프레시 밀크 · 아이스크림</span>
@@ -148,10 +148,10 @@
     </div>
   </div>
 
-  <!-- 닉네임 입력 (로그인 후 최초 1회) -->
+  <!-- 닉네임 입력/변경 -->
   <div id="nick-modal" class="modal hidden">
     <div class="modal-card">
-      <h2>닉네임 정하기</h2>
+      <h2 id="nick-title">닉네임 정하기</h2>
       <p class="modal-lead">랭킹에 표시될 이름이에요.<br />2~12자, 한글·영문·숫자.</p>
       <input id="nick-input" type="text" maxlength="12" placeholder="예: 사르르젖소" autocomplete="off" />
       <p id="nick-msg" class="nick-msg"></p>
@@ -182,16 +182,16 @@
 
   <!-- 계정 레이어 (M2) — supabase-js v2 CDN + 로그인 모듈 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="./js/m2-auth.js?v=20260718e"></script>
+  <script src="./js/m2-auth.js?v=20260718f"></script>
   <script>
     // anon(publishable) 키는 브라우저 노출이 정상인 public-safe 값. service_role 아님.
     const SUPABASE_URL = "https://rstazttwlghsorpzsugy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_uK9OlDkemSL4S6yXFhTqpA_RngpzhiR";
     window.SaruruAuth && SaruruAuth.init(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
-  <script src="./js/auth-ui.js?v=20260718e"></script>
+  <script src="./js/auth-ui.js?v=20260718f"></script>
 
-  <script src="./js/game.js?v=20260718e"></script>
-  <script src="./js/bug-report.js?v=20260718e"></script>
+  <script src="./js/game.js?v=20260718f"></script>
+  <script src="./js/bug-report.js?v=20260718f"></script>
 </body>
 </html>

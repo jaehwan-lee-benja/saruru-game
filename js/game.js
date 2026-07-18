@@ -122,7 +122,7 @@
     t: '#f4d9a2', u: '#dcb873',                                // 와플콘
     // 게임 전용(BI 팔레트와 조화되게 톤 맞춤)
     B: '#a8763f', b: '#754c26', h: '#c9975c',                  // 소똥
-    V: '#5a6b93', v: '#3d4a6d',                                // 목장 건물 지붕(진회색 슬레이트)
+    V: '#8698bd', v: '#63749d',                                // 목장 건물 지붕(연한 슬레이트블루 · 벽과 대조 완화)
     A: '#e9ddc2', a: '#cfc0a0', z: '#b3a486',                  // 목장 건물 벽(베이지 벽돌 · 정면/측면/줄눈)
   };
 
@@ -389,7 +389,7 @@
   const player = { x: VW / 2, w: 26, speed: 3.1, vx: 0 };  // w=26 = 얼굴 코어(40px 전체 아님)
   let items = [];
   let sparks = [];
-  let score = 0, lives = 3, elapsed = 0, spawnTimer = 0, invuln = 0, lastTime = 0;
+  let score = 0, lives = 2, elapsed = 0, spawnTimer = 0, invuln = 0, lastTime = 0;
   const clouds = [{ x: 34, y: 42, s: 0.11 }, { x: 134, y: 22, s: 0.07 }, { x: 196, y: 64, s: 0.09 }];
   const input = { left: false, right: false, targetX: null };
 
@@ -512,7 +512,7 @@
     state = 'playing';
     items = []; sparks = [];
     // playT = 난이도 시계. 이걸 안 지우면 재시작해도 이전 판의 속도가 그대로 넘어온다.
-    score = 0; lives = 3; spawnTimer = 0; invuln = 0; playT = 0;
+    score = 0; lives = 2; spawnTimer = 0; invuln = 0; playT = 0;
     player.x = VW / 2; player.vx = 0;
     input.targetX = null;
     el.start.classList.add('hidden');

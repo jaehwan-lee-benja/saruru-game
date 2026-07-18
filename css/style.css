@@ -73,11 +73,15 @@ html, body {
   background: #fff;
   border: 2px solid var(--navy);
   padding: 5px 8px;
-  max-width: 96px;
+  max-width: 110px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+  font-family: inherit;
 }
+.who::after { content: " ✎"; opacity: .55; }
+.who:hover { background: var(--cream, #fff6e6); }
 .who[hidden] { display: none; }
 
 /* ---- 워드마크 로고 (Galmuri · 사르르=NAVY, 목장=BERRY) ---- */
@@ -441,7 +445,9 @@ html, body {
   box-shadow: 4px 4px 0 var(--sky);
 }
 .btn-ghost:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--sky); }
-.bug-msg { font-size: 10px; color: var(--berry); line-height: 1.6; margin: 10px 0 0; min-height: 14px; }
+.bug-msg { font-size: 10px; color: var(--navy); line-height: 1.6; margin: 10px 0 0; min-height: 14px; }
+.bug-msg.ok { color: #2f8f5b; font-weight: bold; }
+.bug-msg.err { color: var(--berry); }
 
 /* ---- Buttons (픽셀) ---- */
 .btn {

@@ -40,11 +40,21 @@
     }
   });
 
-  // ===== 닉네임 모달 =====
+  // ===== 닉네임 모달 (최초 설정 + 변경 공용) =====
   var nickModal = document.getElementById("nick-modal");
   var nickInput = document.getElementById("nick-input");
   var nickMsg = document.getElementById("nick-msg");
-  function openNick() { if (nickModal) { nickModal.classList.remove("hidden"); nickMsg.textContent = ""; if (nickInput) nickInput.focus(); } }
+  var nickTitle = document.getElementById("nick-title");
+  var nickLater = document.getElementById("nick-later");
+  function openNick(changeMode) {
+    if (!nickModal) return;
+    if (nickTitle) nickTitle.textContent = changeMode ? "닉네임 변경" : "닉네임 정하기";
+    if (nickLater) nickLater.textContent = changeMode ? "취소" : "나중에";
+    if (nickInput) nickInput.value = changeMode && state.player ? state.player.nickname : "";
+    nickMsg.textContent = "";
+    nickModal.classList.remove("hidden");
+    if (nickInput) { nickInput.focus(); nickInput.select(); }
+  }
   function closeNick() { if (nickModal) nickModal.classList.add("hidden"); }
   if (nickModal) {
     var laterBtn = document.getElementById("nick-later");
@@ -70,6 +80,12 @@
     e.preventDefault(); e.stopPropagation();
     if (state.user) SaruruAuth.logout();
     else openModal();
+  });
+
+  // 닉네임(who) 클릭 → 닉네임 변경 모달
+  if (who) who.addEventListener("click", function (e) {
+    e.preventDefault(); e.stopPropagation();
+    if (state.user) openNick(true);
   });
 
   // 모달 배경 클릭 → 닫기

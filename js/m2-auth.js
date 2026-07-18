@@ -36,8 +36,24 @@
   const NICK_MIN = 2, NICK_MAX = 12;
   // 허용 문자: 한글(가-힣, 자모), 영문, 숫자, 공백 제외 언더스코어/하이픈.
   const NICK_RE = /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9_-]{2,12}$/;
-  // 아주 작은 금칙어(부분일치, 소문자 비교). 서버가 최종 방어는 아님 — UX용 1차 필터.
-  const BANNED = ["시발", "씨발", "병신", "admin", "운영자", "관리자", "fuck", "shit", "sex"];
+  // 금칙어(부분일치, 소문자·공백제거 후 비교). 선정성·욕설·사칭 1차 필터.
+  //   ⚠ 클라 필터는 UX용 1차 방어. 완벽 차단은 아니지만 일반 사용자 대다수를 거른다.
+  const BANNED = [
+    // 한글 욕설/비속어
+    "시발", "씨발", "씨팔", "시팔", "쓰발", "씨바", "시바", "존나", "좆", "좇", "지랄",
+    "병신", "븅신", "빙신", "새끼", "새키", "개새", "니미", "니애미", "애미", "애비",
+    "썅", "썅년", "창녀", "창놈", "미친놈", "미친년", "닥쳐", "꺼져", "엿먹",
+    // 한글 선정성
+    "섹스", "섹시", "야동", "자위", "보지", "자지", "성기", "음경", "고자", "젖탱",
+    "포르노", "야설", "성인물", "노출", "변태", "발정",
+    // 사칭/운영
+    "운영자", "관리자", "admin", "운영팀", "사르르공식", "공식계정", "gm", "관리팀",
+    // 영문 욕설/선정
+    "fuck", "fuk", "shit", "bitch", "asshole", "dick", "cock", "pussy", "sex",
+    "porn", "nigger", "nigga", "cunt", "slut", "whore", "rape",
+  ];
+  // 비교용 정규화: 소문자 + 공백/기호 제거(우회 방지).
+  function _norm(s) { return (s || "").toLowerCase().replace(/[\s_.\-]/g, ""); }
 
   function _emitAuth() {
     const needsNickname = !!_user && !_player;
@@ -164,8 +180,8 @@
     if (nick.length < NICK_MIN) return { ok: false, reason: "too_short" };
     if (nick.length > NICK_MAX) return { ok: false, reason: "too_long" };
     if (!NICK_RE.test(nick)) return { ok: false, reason: "bad_chars" };
-    const low = nick.toLowerCase();
-    if (BANNED.some((w) => low.includes(w))) return { ok: false, reason: "banned" };
+    const norm = _norm(nick);
+    if (BANNED.some((w) => norm.includes(_norm(w)))) return { ok: false, reason: "banned" };
     return { ok: true, nick };
   }
 
@@ -184,29 +200,54 @@
     }
   }
 
-  // 닉네임 확정: game.players insert(본인 id). unique 위반은 정상 처리.
+  // 닉네임 확정/변경.
+  //   · 최초(닉 없음) → insert. 이미 있으면 → 본인 행 update(RLS players_update_own).
+  //   · unique 위반(23505) = 남이 쓰는 닉 → taken. 같은 닉으로 저장은 no-op 성공 처리.
   async function setNickname(raw) {
     const v = _validateNick(raw);
     if (!v.ok) return { ok: false, error: v.reason };
     if (!client || !_user) return { ok: false, error: "not_logged_in" };
+    // 변경인데 값이 그대로면 서버 안 거치고 성공.
+    if (_player && _player.nickname === v.nick) return { ok: true, player: _player };
+    const changing = !!_player;
     try {
-      const { data, error } = await client
-        .from("players")
-        .insert({ id: _user.id, nickname: v.nick })
-        .select("id, nickname, created_at")
-        .single();
+      const q = changing
+        ? client.from("players").update({ nickname: v.nick }).eq("id", _user.id)
+        : client.from("players").insert({ id: _user.id, nickname: v.nick });
+      const { data, error } = await q.select("id, nickname, created_at").single();
       if (error) {
-        // 23505 = unique_violation → 이미 쓰는 닉
         if (error.code === "23505") return { ok: false, error: "taken" };
         console.warn("[SaruruAuth] setNickname 오류", error);
-        return { ok: false, error: error.message || "insert_failed" };
+        return { ok: false, error: error.message || "save_failed" };
       }
       _player = data;
       _emitAuth();
       return { ok: true, player: data };
     } catch (e) {
       console.warn("[SaruruAuth] setNickname 예외", e);
-      return { ok: false, error: "insert_failed" };
+      return { ok: false, error: "save_failed" };
+    }
+  }
+
+  // ---- 버그 신고 (game.bug_reports · 로그인 사용자 본인 insert) --------------
+  async function submitBug(body, meta) {
+    const text = (body || "").trim();
+    if (!text) return { ok: false, error: "empty" };
+    if (text.length > 2000) return { ok: false, error: "too_long" };
+    if (!client || !_user) return { ok: false, error: "not_logged_in" };
+    try {
+      const { error } = await client.from("bug_reports").insert({
+        user_id: _user.id,
+        nickname: _player ? _player.nickname : null,
+        body: text,
+        meta: meta || null,
+        user_agent: (navigator && navigator.userAgent) || null,
+      });
+      if (error) { console.warn("[SaruruAuth] submitBug 오류", error); return { ok: false, error: "save_failed" }; }
+      return { ok: true };
+    } catch (e) {
+      console.warn("[SaruruAuth] submitBug 예외", e);
+      return { ok: false, error: "network" };
     }
   }
 
@@ -267,7 +308,7 @@
   // ---- 전역 노출 ----------------------------------------------------------
   window.SaruruAuth = {
     init, onAuth, loginKakao, loginGoogle, logout,
-    checkNickname, setNickname,
+    checkNickname, setNickname, submitBug,
     submitScore, getLeaderboard,
     getState,
   };
