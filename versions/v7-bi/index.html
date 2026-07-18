@@ -151,16 +151,16 @@
 
   <!-- 계정 레이어 (M2) — supabase-js v2 CDN + 로그인 모듈 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="./js/m2-auth.js"></script>
+  <script src="./js/m2-auth.js?v=20260718c"></script>
   <script>
     // anon(publishable) 키는 브라우저 노출이 정상인 public-safe 값. service_role 아님.
     const SUPABASE_URL = "https://rstazttwlghsorpzsugy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_uK9OlDkemSL4S6yXFhTqpA_RngpzhiR";
     window.SaruruAuth && SaruruAuth.init(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
-  <script src="./js/auth-ui.js"></script>
+  <script src="./js/auth-ui.js?v=20260718c"></script>
 
-  <script src="./js/game.js"></script>
-  <script src="./js/bug-report.js"></script>
+  <script src="./js/game.js?v=20260718c"></script>
+  <script src="./js/bug-report.js?v=20260718c"></script>
 </body>
 </html>
