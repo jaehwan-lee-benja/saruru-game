@@ -120,7 +120,9 @@
     try {
       const { error } = await client.auth.signInWithOAuth({
         provider: "kakao",
-        options: { redirectTo },
+        // scope 최소화: 기본값(account_email 포함)은 카카오 비즈앱 검수가 필요해 KOE205 유발.
+        // 이메일·프로필사진 안 받고 profile_nickname만 요청(카카오 콘솔에서 이 항목 활성화 필요).
+        options: { redirectTo, scopes: "profile_nickname" },
       });
       if (error) { console.warn("[SaruruAuth] kakao 로그인 오류", error); return { ok: false, error: error.message }; }
       return { ok: true }; // 이후 브라우저가 카카오로 리다이렉트됨
