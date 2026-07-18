@@ -43,43 +43,54 @@ html, body {
   margin: 0 auto;
 }
 
-/* ---- Topbar ---- */
-.topbar {
+/* ---- 하단 유틸 바 — 로그인 · 소리 · 버그신고 한 줄 ---- */
+.util-bar {
   width: 100%;
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 4px 12px;
+  gap: 8px;
+  margin-top: 16px;
 }
-.brand-logo {
-  height: 64px;
-  width: auto;
-  image-rendering: auto; /* 로고는 매끈하게 */
-}
-.topbar-btns { position: absolute; right: 2px; top: 4px; display: flex; gap: 6px; align-items: center; }
-.who {
-  font-size: 10px;
+.util-btn {
+  font-family: var(--pixel-font);
+  font-size: 11px;
   color: var(--navy);
   background: var(--milk);
   border: 2px solid var(--sky);
-  padding: 4px 7px;
+  padding: 7px 12px;
+  cursor: pointer;
+  line-height: 1;
+  white-space: nowrap;
+}
+.util-btn:hover { border-color: var(--navy); }
+.util-btn:active { transform: translate(1px, 1px); }
+.util-btn.icon { font-size: 15px; padding: 6px 10px; }
+.util-btn.muted { opacity: 0.55; filter: grayscale(1); }
+.who {
+  font-size: 10px;
+  color: var(--navy);
+  background: #fff;
+  border: 2px solid var(--navy);
+  padding: 5px 8px;
   max-width: 96px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .who[hidden] { display: none; }
-/* 상단바 로그인/로그아웃 버튼 — 열쇠 이모지 대신 텍스트로 명확하게 */
-#btn-login {
-  width: auto;
-  padding: 0 12px;
-  font-family: var(--pixel-font);
-  font-size: 11px;
-  color: var(--navy);
-  white-space: nowrap;
+
+/* ---- 워드마크 로고 (Galmuri · 사르르=NAVY, 목장=BERRY) ---- */
+.wordmark {
+  margin-top: 18px;
+  font-family: var(--pixel-font-title);
+  font-size: 26px;
+  letter-spacing: 1px;
+  line-height: 1;
+  text-align: center;
 }
-#btn-login.logged-in { color: var(--navy-soft); }
+.wordmark .wm-a { color: var(--navy); }
+.wordmark .wm-b { color: var(--berry); }
 
 /* 소셜 로그인 버튼 (로그인 모달) */
 .login-card { max-width: 320px; text-align: center; }
@@ -103,19 +114,6 @@ html, body {
 .social-btn.google { background: #fff; color: #3c4043; border: 1px solid #dadce0; }
 .social-btn:active { transform: translateY(1px); }
 .login-card .btn-ghost { margin-top: 14px; width: 100%; }
-.icon-btn {
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
-  line-height: 1;
-  background: var(--milk);
-  border: 3px solid var(--ink);
-  box-shadow: 3px 3px 0 var(--sky);
-  cursor: pointer;
-  padding: 0;
-}
-.icon-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--sky); }
-.icon-btn.muted { opacity: 0.55; filter: grayscale(1); }
 
 /* ---- Stage ---- */
 .stage-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
@@ -136,6 +134,14 @@ html, body {
 .hud-label { display: block; font-size: 9px; color: var(--navy-soft); letter-spacing: 1px; }
 .hud-value { display: block; font-size: 16px; margin-top: 4px; color: var(--navy); }
 .hud-item.lives .hud-value { color: var(--berry); letter-spacing: 1px; }
+/* HUD 안의 일시정지 버튼 — 스코어/베스트/라이프와 같은 칸 스타일 */
+.hud-btn {
+  font-family: var(--pixel-font);
+  cursor: pointer;
+  transition: transform 0.05s steps(1);
+}
+.hud-btn .hud-value { color: var(--navy); }
+.hud-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--sky); }
 
 /* ---- Canvas (픽셀 확대) ----
    너비뿐 아니라 "남는 세로"에서도 크기를 끌어낸다 — 안 그러면 낮은 폰에서 게임이 잘린다.

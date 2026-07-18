@@ -13,16 +13,6 @@
 </head>
 <body>
   <div id="app">
-    <header class="topbar">
-      <img class="brand-logo" src="./assets/logo.png" alt="사르르목장" />
-      <div class="topbar-btns">
-        <span id="who" class="who" hidden></span>
-        <button id="btn-login" class="icon-btn" aria-label="카카오 로그인" title="카카오 로그인">🔑</button>
-        <button id="btn-pause" class="icon-btn" aria-label="일시정지" title="일시정지">⏸</button>
-        <button id="btn-mute" class="icon-btn" aria-label="소리 켜기/끄기" title="소리">🔊</button>
-      </div>
-    </header>
-
     <main class="stage-wrap">
       <div class="hud">
         <div class="hud-item">
@@ -37,6 +27,10 @@
           <span class="hud-label">LIFE</span>
           <span id="lives" class="hud-value">♥♥♥</span>
         </div>
+        <button id="btn-pause" class="hud-item hud-btn" type="button" aria-label="일시정지">
+          <span class="hud-label">PAUSE</span>
+          <span class="hud-value">⏸</span>
+        </button>
       </div>
 
       <div class="canvas-frame">
@@ -81,9 +75,20 @@
       </div>
     </main>
 
+    <!-- 하단 유틸 바 — 로그인 · 소리 · 버그신고 한 줄 -->
+    <div class="util-bar">
+      <button id="btn-login" class="util-btn" type="button" aria-label="로그인">로그인</button>
+      <span id="who" class="who" hidden></span>
+      <button id="btn-mute" class="util-btn icon" type="button" aria-label="소리 켜기/끄기" title="소리">🔊</button>
+      <button id="btn-bug" class="util-btn" type="button">🐞 버그 신고</button>
+    </div>
+
+    <!-- 워드마크 로고 (Galmuri 폰트 · 사르르=NAVY, 목장=BERRY) -->
+    <div class="wordmark" aria-label="사르르목장">
+      <span class="wm-a">사르르</span><span class="wm-b">목장</span>
+    </div>
     <footer class="footer">
-      <span>사르르목장 · FRESH MILK ICE CREAM</span>
-      <button id="btn-bug" class="bug-btn" type="button">🐞 버그 신고</button>
+      <span>FRESH MILK · ICE CREAM</span>
     </footer>
   </div>
 

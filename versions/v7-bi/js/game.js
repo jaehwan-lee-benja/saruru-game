@@ -496,7 +496,9 @@
     state = p ? 'paused' : 'playing';
     input.left = input.right = false; input.targetX = null;
     el.pause.classList.toggle('hidden', !p);
-    if (el.btnPause) el.btnPause.textContent = p ? '▶' : '⏸';
+    // btn-pause는 HUD 칸 구조(label+value) — value span만 교체(라벨 유지)
+    const pv = el.btnPause && el.btnPause.querySelector('.hud-value');
+    if (pv) pv.textContent = p ? '▶' : '⏸';
   }
   if (el.btnPause) el.btnPause.addEventListener('click', (e) => {
     e.preventDefault(); e.stopPropagation();
