@@ -59,7 +59,8 @@
           var m = { taken: "이미 쓰는 닉네임이에요.", too_short: "2자 이상이어야 해요.",
                     too_long: "12자까지만 돼요.", bad_chars: "한글·영문·숫자만 돼요.",
                     banned: "쓸 수 없는 단어예요.", not_logged_in: "로그인이 필요해요." };
-          nickMsg.textContent = m[r.error] || "저장에 실패했어요. 잠시 후 다시.";
+          // 진단용: 매핑 안 된 에러는 원문을 그대로 노출(원인 파악 후 되돌린다)
+          nickMsg.textContent = m[r.error] || ("저장 실패: " + (r.error || "알수없음"));
         }
       });
     });
