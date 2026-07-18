@@ -232,13 +232,14 @@ html, body {
   width: 10px;
   height: 10px;
   margin: -5px 0 0 -5px;
-  background: var(--berry);
+  background: var(--navy);
   opacity: var(--pg, 0);
   transition: opacity 0.12s steps(2);
   pointer-events: none;
+  /* 픽셀 블루 계단 — 진한 네이비에서 옅은 스카이로 5단 */
   box-shadow:
-    0 0 0 5px var(--strawberry),
-    0 0 0 10px #ffd9e2,
+    0 0 0 5px #5a72aa,
+    0 0 0 10px #8095c1,
     0 0 0 15px var(--sky),
     0 0 0 20px #d6e0f1,
     0 0 0 25px var(--sky-soft);
