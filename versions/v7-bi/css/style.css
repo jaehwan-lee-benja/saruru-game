@@ -473,3 +473,9 @@ html, body {
   color: var(--navy-soft);
   letter-spacing: 1px;
 }
+.footer-link {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--navy);
+  text-decoration: underline;
+}

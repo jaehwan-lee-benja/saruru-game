@@ -9,7 +9,7 @@
   <link rel="icon" href="./assets/logo.png" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css" />
-  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/style.css?v=20260718h" />
 </head>
 <body>
   <div id="app">
@@ -111,10 +111,11 @@
 
     <!-- 워드마크 로고 (design 제공 · 오동통 아웃라인 에셋 · 네이비 #38528a) -->
     <div class="wordmark" aria-label="사르르목장">
-      <img src="./assets/saruru-wordmark.png?v=20260718g" alt="사르르목장" class="wordmark-img" />
+      <img src="./assets/saruru-wordmark.png?v=20260718h" alt="사르르목장" class="wordmark-img" />
     </div>
     <footer class="footer">
       <span>프레시 밀크 · 아이스크림</span>
+      <a class="footer-link" href="./privacy.html">개인정보처리방침</a>
     </footer>
   </div>
 
@@ -182,16 +183,16 @@
 
   <!-- 계정 레이어 (M2) — supabase-js v2 CDN + 로그인 모듈 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="./js/m2-auth.js?v=20260718g"></script>
+  <script src="./js/m2-auth.js?v=20260718h"></script>
   <script>
     // anon(publishable) 키는 브라우저 노출이 정상인 public-safe 값. service_role 아님.
     const SUPABASE_URL = "https://rstazttwlghsorpzsugy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_uK9OlDkemSL4S6yXFhTqpA_RngpzhiR";
     window.SaruruAuth && SaruruAuth.init(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
-  <script src="./js/auth-ui.js?v=20260718g"></script>
+  <script src="./js/auth-ui.js?v=20260718h"></script>
 
-  <script src="./js/game.js?v=20260718g"></script>
-  <script src="./js/bug-report.js?v=20260718g"></script>
+  <script src="./js/game.js?v=20260718h"></script>
+  <script src="./js/bug-report.js?v=20260718h"></script>
 </body>
 </html>
