@@ -36,8 +36,25 @@
       <div class="canvas-frame">
         <canvas id="game" width="224" height="336"></canvas>
 
-        <!-- 시작 화면 -->
-        <div id="overlay-start" class="overlay">
+        <!-- 웰컴/로그인 화면 (미로그인 시 · 사르르 놀이동산 브랜드) -->
+        <div id="overlay-welcome" class="overlay">
+          <div class="card welcome-card">
+            <canvas id="welcome-face" width="40" height="42" class="welcome-face"></canvas>
+            <h1 class="welcome-title"><span class="wm-a">사르르</span><br /><span class="wm-b">놀이동산</span></h1>
+            <p class="lead">로그인하고<br /><b>미니게임과 랭킹</b>을 즐겨보세요!</p>
+            <button id="welcome-kakao" class="social-btn kakao" type="button">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#191919" d="M12 3C6.48 3 2 6.53 2 10.9c0 2.82 1.87 5.3 4.68 6.7-.15.53-.79 2.8-.83 2.98-.05.24.09.24.19.17.08-.05 2.6-1.77 3.69-2.51.68.1 1.38.15 2.27.15 5.52 0 10-3.53 10-7.9C22 6.53 17.52 3 12 3z"/></svg>
+              <span>카카오로 시작하기</span>
+            </button>
+            <button id="welcome-google" class="social-btn google" type="button">
+              <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              <span>Google로 시작하기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 시작 화면 (로그인 후) -->
+        <div id="overlay-start" class="overlay hidden">
           <div class="card">
             <h1>젖소 똥피하기</h1>
             <p class="lead">우리 젖소가 <b>소똥</b>을 피하고<br /><b>우유·아이스크림</b>을 모아요!</p>
@@ -151,16 +168,16 @@
 
   <!-- 계정 레이어 (M2) — supabase-js v2 CDN + 로그인 모듈 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="./js/m2-auth.js?v=20260718c"></script>
+  <script src="./js/m2-auth.js?v=20260718d"></script>
   <script>
     // anon(publishable) 키는 브라우저 노출이 정상인 public-safe 값. service_role 아님.
     const SUPABASE_URL = "https://rstazttwlghsorpzsugy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_uK9OlDkemSL4S6yXFhTqpA_RngpzhiR";
     window.SaruruAuth && SaruruAuth.init(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
-  <script src="./js/auth-ui.js?v=20260718c"></script>
+  <script src="./js/auth-ui.js?v=20260718d"></script>
 
-  <script src="./js/game.js?v=20260718c"></script>
-  <script src="./js/bug-report.js?v=20260718c"></script>
+  <script src="./js/game.js?v=20260718d"></script>
+  <script src="./js/bug-report.js?v=20260718d"></script>
 </body>
 </html>

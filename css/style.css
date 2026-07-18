@@ -115,6 +115,28 @@ html, body {
 .social-btn:active { transform: translateY(1px); }
 .login-card .btn-ghost { margin-top: 14px; width: 100%; }
 
+/* ---- 웰컴/로그인 게이트 (사르르 놀이동산) ---- */
+.welcome-card { text-align: center; }
+.welcome-face {
+  width: 88px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  margin: 0 auto 6px;
+  display: block;
+}
+.welcome-title {
+  font-family: var(--pixel-font-title);
+  font-size: 26px;
+  line-height: 1.25;
+  margin: 2px 0 12px;
+  letter-spacing: 1px;
+}
+.welcome-title .wm-a { color: var(--navy); }
+.welcome-title .wm-b { color: var(--berry); }
+.welcome-card .lead { margin-bottom: 18px; }
+.welcome-card .social-btn { max-width: 260px; margin-left: auto; margin-right: auto; }
+
 /* ---- 닉네임 모달 ---- */
 #nick-input {
   width: 100%;

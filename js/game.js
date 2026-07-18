@@ -38,6 +38,8 @@
     btnPause: document.getElementById('btn-pause'),
     btnResume: document.getElementById('btn-resume'),
     pause: document.getElementById('overlay-pause'),
+    welcome: document.getElementById('overlay-welcome'),
+    welcomeFace: document.getElementById('welcome-face'),
     hatPick: document.getElementById('hat-pick'),
     pad: document.getElementById('pad'),
   };
@@ -381,7 +383,7 @@
   };
 
   // ===== 상태 =====
-  let state = 'ready';
+  let state = 'locked';   // 초기 = 로그인 게이트(웰컴). 로그인해야 'ready'로 풀린다.
   let hat = localStorage.getItem(HAT_KEY);
   if (HATS.indexOf(hat) < 0) hat = 'milk';
   const player = { x: VW / 2, w: 26, speed: 3.1, vx: 0 };  // w=26 = 얼굴 코어(40px 전체 아님)
@@ -420,6 +422,35 @@
     });
   }
   buildHatPicker();
+
+  // ===== 로그인 게이트 (로그아웃 상태에선 게임 불가 · 웰컴 화면) =====
+  // 웰컴 화면 마스코트(우유팩 얼굴) 1회 렌더
+  if (el.welcomeFace) {
+    const wsp = FACE_SP.milk, wx = el.welcomeFace.getContext('2d');
+    wx.imageSmoothingEnabled = false;
+    for (let r = 0; r < wsp.length; r++) for (let c = 0; c < wsp[r].length; c++) {
+      const col = PAL[wsp[r][c]];
+      if (col) { wx.fillStyle = col; wx.fillRect(c, r, 1, 1); }
+    }
+  }
+  function lockGame() {   // 미로그인: 웰컴만 노출, 나머지 오버레이 숨김, 진행 중이면 중단
+    state = 'locked';
+    items = []; sparks = [];
+    if (el.welcome) el.welcome.classList.remove('hidden');
+    el.start.classList.add('hidden');
+    el.over.classList.add('hidden');
+    if (el.pause) el.pause.classList.add('hidden');
+  }
+  function unlockGame() { // 로그인: 웰컴 닫고 시작 화면으로
+    if (el.welcome) el.welcome.classList.add('hidden');
+    if (state === 'locked') { state = 'ready'; el.start.classList.remove('hidden'); }
+  }
+  if (window.SaruruAuth) {
+    SaruruAuth.onAuth(function (s) { if (s.user) unlockGame(); else lockGame(); });
+  } else {
+    // 계정 모듈이 없으면(오프라인 등) 게임을 막지 않는다 — 로컬 플레이 폴백
+    unlockGame();
+  }
 
   // ===== 입력 =====
   window.addEventListener('keydown', (e) => {
@@ -477,6 +508,7 @@
 
   // ===== 흐름 =====
   function startGame() {
+    if (state === 'locked') return;   // 로그인 게이트 — 미로그인이면 시작 불가
     state = 'playing';
     items = []; sparks = [];
     // playT = 난이도 시계. 이걸 안 지우면 재시작해도 이전 판의 속도가 그대로 넘어온다.
