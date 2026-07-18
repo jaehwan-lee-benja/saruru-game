@@ -464,19 +464,22 @@
   });
   // 캔버스와 컨트롤 패드 둘 다 조작면. 패드는 캐릭터 아래라 엄지가 화면을 안 가린다.
   function bindDrag(surface) {
-    const toVX = (clientX) => {
+    // 조작 위치를 좌우 비율(0~1)로 환산 — 캔버스든 패드든 같은 컨트롤 축이라
+    // 어느 쪽에서 조작해도 아래 패드 음영이 같은 위치에 뜬다.
+    const toFrac = (clientX) => {
       const r = surface.getBoundingClientRect();
-      return ((clientX - r.left) / r.width) * VW;
+      return Math.max(0, Math.min(1, (clientX - r.left) / r.width));
     };
     const onPointer = (e) => {
       if (state !== 'playing') return;
       const t = e.touches ? e.touches[0] : e;
       if (!t) return;
-      input.targetX = toVX(t.clientX);
-      glow(surface, t.clientX, true);
+      const frac = toFrac(t.clientX);
+      input.targetX = frac * VW;
+      padGlow(frac, true);
       e.preventDefault();
     };
-    const release = () => { input.targetX = null; glow(surface, 0, false); };
+    const release = () => { input.targetX = null; padGlow(0, false); };
     surface.addEventListener('touchstart', onPointer, { passive: false });
     surface.addEventListener('touchmove', onPointer, { passive: false });
     surface.addEventListener('touchend', release);
@@ -484,14 +487,15 @@
     window.addEventListener('mousemove', (e) => { if (surface._drag) onPointer(e); });
     window.addEventListener('mouseup', () => { if (surface._drag) { surface._drag = false; release(); } });
   }
-  // 컨트롤 패드에서 손가락을 따라다니는 음영 — 지금 잡고 있는 위치가 보이게
-  function glow(surface, clientX, on) {
-    if (!el.pad || surface !== el.pad) return;
+  // 컨트롤 패드의 음영 — 지금 조작 중인 좌우 위치를 보여준다(캔버스·패드 공용).
+  //   frac: 0(왼쪽)~1(오른쪽). 캔버스에서 조작해도 이 함수가 패드를 구동한다.
+  function padGlow(frac, on) {
+    if (!el.pad) return;
     if (on) {
-      const r = el.pad.getBoundingClientRect();
+      const w = el.pad.getBoundingClientRect().width;
       // 8px 그리드에 스냅 — 픽셀 컨셉이라 음영도 뚝뚝 끊겨 움직인다
-      const snapped = Math.round((clientX - r.left) / 8) * 8;
-      el.pad.style.setProperty('--px', Math.max(0, Math.min(r.width, snapped)) + 'px');
+      const snapped = Math.round((frac * w) / 8) * 8;
+      el.pad.style.setProperty('--px', Math.max(0, Math.min(w, snapped)) + 'px');
     }
     el.pad.style.setProperty('--pg', on ? '1' : '0');
     el.pad.classList.toggle('touching', !!on);
@@ -500,8 +504,11 @@
   if (el.pad) {
     bindDrag(el.pad);
     // 마우스로 그냥 지나가도 따라오게(데스크톱 재미 요소)
-    el.pad.addEventListener('mousemove', (e) => glow(el.pad, e.clientX, true));
-    el.pad.addEventListener('mouseleave', () => glow(el.pad, 0, false));
+    el.pad.addEventListener('mousemove', (e) => {
+      const r = el.pad.getBoundingClientRect();
+      padGlow(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), true);
+    });
+    el.pad.addEventListener('mouseleave', () => padGlow(0, false));
   }
   el.btnStart.addEventListener('click', startGame);
   el.btnRetry.addEventListener('click', startGame);
