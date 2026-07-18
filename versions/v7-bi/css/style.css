@@ -115,6 +115,47 @@ html, body {
 .social-btn:active { transform: translateY(1px); }
 .login-card .btn-ghost { margin-top: 14px; width: 100%; }
 
+/* ---- 닉네임 모달 ---- */
+#nick-input {
+  width: 100%;
+  font-family: var(--pixel-font);
+  font-size: 15px;
+  text-align: center;
+  padding: 10px;
+  border: 3px solid var(--sky);
+  background: var(--milk);
+  color: var(--ink);
+}
+#nick-input:focus { outline: none; border-color: var(--navy); }
+.nick-msg { font-size: 11px; color: var(--berry); min-height: 15px; margin: 8px 0 4px; }
+
+/* ---- 랭킹 패널 (게임오버 카드) ---- */
+.rank-panel { margin: 4px 0 14px; }
+.rank-panel.hidden { display: none; }
+.rank-tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; }
+.rank-tab {
+  font-family: var(--pixel-font);
+  font-size: 10px;
+  color: var(--navy-soft);
+  background: var(--milk);
+  border: 2px solid var(--sky);
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.rank-tab.on { color: #fff; background: var(--navy); border-color: var(--navy); }
+.rank-list { list-style: none; margin: 0; padding: 0; text-align: left; }
+.rank-row, .rank-loading, .rank-empty {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; padding: 5px 8px; color: var(--ink);
+  border-bottom: 1px dotted var(--sky);
+}
+.rank-loading, .rank-empty { justify-content: center; color: var(--navy-soft); border: 0; }
+.rank-row .rk-no { width: 20px; text-align: center; color: var(--navy-soft); font-weight: 700; }
+.rank-row .rk-nick { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-row .rk-best { color: var(--navy); font-weight: 700; }
+.rank-row.me { background: var(--strawberry); border-radius: 4px; }
+.rank-row.me .rk-no, .rank-row.me .rk-best { color: var(--ink); }
+
 /* ---- Stage ---- */
 .stage-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 

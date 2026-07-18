@@ -54,6 +54,14 @@
             <div class="over-badge" id="over-badge">게임<br>오버</div>
             <p class="score-line">점수 <b id="final-score">0</b></p>
             <p class="best-line" id="best-line"></p>
+            <!-- 랭킹 패널 (로그인 시 노출) -->
+            <div id="rank-panel" class="rank-panel hidden">
+              <div class="rank-tabs">
+                <button class="rank-tab on" data-period="week" type="button">주간</button>
+                <button class="rank-tab" data-period="all" type="button">전체</button>
+              </div>
+              <ol id="rank-list" class="rank-list"></ol>
+            </div>
             <button id="btn-retry" class="btn btn-primary">↻ 다시하기</button>
           </div>
         </div>
@@ -106,6 +114,20 @@
         <span>Google로 로그인</span>
       </button>
       <button id="login-close" class="btn btn-ghost" type="button">닫기</button>
+    </div>
+  </div>
+
+  <!-- 닉네임 입력 (로그인 후 최초 1회) -->
+  <div id="nick-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>닉네임 정하기</h2>
+      <p class="modal-lead">랭킹에 표시될 이름이에요.<br />2~12자, 한글·영문·숫자.</p>
+      <input id="nick-input" type="text" maxlength="12" placeholder="예: 사르르젖소" autocomplete="off" />
+      <p id="nick-msg" class="nick-msg"></p>
+      <div class="modal-btns">
+        <button id="nick-later" class="btn btn-ghost" type="button">나중에</button>
+        <button id="nick-save" class="btn btn-primary" type="button">확정</button>
+      </div>
     </div>
   </div>
 

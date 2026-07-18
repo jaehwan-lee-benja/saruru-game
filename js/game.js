@@ -517,7 +517,50 @@
     el.bestLine.textContent = nb ? '★ 새 최고기록! 사르르목장 신기록 ★' : '최고 ' + best;
     el.over.classList.remove('hidden');
     SFX.over();
+    submitAndShowRank(fs);   // 로그인 시 서버 점수 제출 + 리더보드(미로그인/오프라인이면 조용히 스킵)
   }
+
+  // ===== 온라인 랭킹 (M2 · SaruruAuth 있을 때만) =====
+  const rankPanel = document.getElementById('rank-panel');
+  const rankList = document.getElementById('rank-list');
+  let rankPeriod = 'week';
+  function submitAndShowRank(fs) {
+    const A = window.SaruruAuth;
+    if (!A || !rankPanel) return;
+    const st = A.getState();
+    if (!st.user || !st.player) { rankPanel.classList.add('hidden'); return; } // 로그인+닉네임 있어야
+    // 점수 제출은 서버 치트검증 경유 — 실패해도 게임 흐름 안 막음
+    A.submitScore(fs, Math.floor(playT * 1000), 'ddong').then((r) => {
+      if (r.ok && r.best > best) { best = r.best; localStorage.setItem(BEST_KEY, String(best)); el.best.textContent = best; }
+      loadRank();
+    });
+  }
+  function loadRank() {
+    const A = window.SaruruAuth;
+    if (!A || !rankPanel || !rankList) return;
+    rankPanel.classList.remove('hidden');
+    rankList.innerHTML = '<li class="rank-loading">불러오는 중…</li>';
+    A.getLeaderboard('ddong', rankPeriod, 10).then(({ rows }) => {
+      const myNick = A.getState().player && A.getState().player.nickname;
+      if (!rows || !rows.length) { rankList.innerHTML = '<li class="rank-empty">아직 기록이 없어요. 첫 주인공이 되어보세요!</li>'; return; }
+      rankList.innerHTML = rows.map((r, i) => {
+        const me = myNick && r.nickname === myNick ? ' me' : '';
+        return '<li class="rank-row' + me + '"><span class="rk-no">' + (i + 1) + '</span>' +
+               '<span class="rk-nick">' + escapeHtml(r.nickname) + '</span>' +
+               '<span class="rk-best">' + r.best + '</span></li>';
+      }).join('');
+    });
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  // 주간/전체 탭
+  document.querySelectorAll('.rank-tab').forEach((t) => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.rank-tab').forEach((x) => x.classList.remove('on'));
+      t.classList.add('on');
+      rankPeriod = t.getAttribute('data-period') === 'all' ? 'all' : 'week';
+      loadRank();
+    });
+  });
   function updateHud() {
     el.score.textContent = Math.floor(score);
     el.lives.textContent = '♥'.repeat(Math.max(0, lives)) || '·';

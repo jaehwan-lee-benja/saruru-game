@@ -28,6 +28,8 @@
       who.textContent = s.player ? s.player.nickname : "로그인됨";
       who.hidden = false;
       closeModal();
+      // 로그인은 됐는데 닉네임이 없으면(최초) 닉네임 모달 열기
+      if (s.needsNickname) openNick();
     } else {
       btn.textContent = "로그인";
       btn.classList.remove("logged-in");
@@ -37,6 +39,31 @@
       who.textContent = "";
     }
   });
+
+  // ===== 닉네임 모달 =====
+  var nickModal = document.getElementById("nick-modal");
+  var nickInput = document.getElementById("nick-input");
+  var nickMsg = document.getElementById("nick-msg");
+  function openNick() { if (nickModal) { nickModal.classList.remove("hidden"); nickMsg.textContent = ""; if (nickInput) nickInput.focus(); } }
+  function closeNick() { if (nickModal) nickModal.classList.add("hidden"); }
+  if (nickModal) {
+    var laterBtn = document.getElementById("nick-later");
+    var saveBtn = document.getElementById("nick-save");
+    if (laterBtn) laterBtn.addEventListener("click", closeNick);
+    if (saveBtn) saveBtn.addEventListener("click", function () {
+      var v = (nickInput.value || "").trim();
+      nickMsg.textContent = "확인 중…";
+      SaruruAuth.setNickname(v).then(function (r) {
+        if (r.ok) { closeNick(); }
+        else {
+          var m = { taken: "이미 쓰는 닉네임이에요.", too_short: "2자 이상이어야 해요.",
+                    too_long: "12자까지만 돼요.", bad_chars: "한글·영문·숫자만 돼요.",
+                    banned: "쓸 수 없는 단어예요.", not_logged_in: "로그인이 필요해요." };
+          nickMsg.textContent = m[r.error] || "저장에 실패했어요. 잠시 후 다시.";
+        }
+      });
+    });
+  }
 
   // 상단바 버튼: 로그인 상태면 로그아웃, 아니면 로그인 모달
   btn.addEventListener("click", function (e) {
