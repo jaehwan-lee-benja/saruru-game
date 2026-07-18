@@ -259,5 +259,33 @@ grant select                 on game.best_scores to authenticated;
 -- (grant execute 는 위 함수 정의부에서 처리)
 
 -- ============================================================================
+-- 8) service_role  —  ★M2 최초본 누락(2026-07-18 운영 중 발견·핫픽스)
+-- ----------------------------------------------------------------------------
+--   원인: submit_score Edge Function 은 service_role 로 game 테이블에 쓴다.
+--         그런데 최초본은 anon/authenticated 에만 grant → service_role 이
+--         game 스키마 usage 조차 없어 permission denied → Edge Function 500
+--         → "점수가 기록 안 됨". (리더보드 조회는 anon 함수라 정상 → 증상 헷갈림)
+--   교훈: RLS 우회 = 권한 우회 아님. service_role 도 스키마/테이블 grant 필요.
+grant usage on schema game to service_role;
+grant select, insert, update, delete on game.players     to service_role;
+grant select, insert, update, delete on game.scores      to service_role;
+grant select, insert, update, delete on game.best_scores to service_role;
+grant usage, select on all sequences in schema game to service_role;
+
+-- ============================================================================
+-- 9) PostgREST 스키마 노출  —  ★M2 최초본 누락(2026-07-18 발견·핫픽스)
+-- ----------------------------------------------------------------------------
+--   원인: PostgREST 는 노출 스키마 화이트리스트(pgrst.db_schemas)에 든
+--         스키마만 REST/RPC 로 서빙. game 이 목록에 없어 프론트의 RPC 호출이
+--         "Invalid schema: game" → 닉네임 저장/리더보드 실패.
+--   적용: (기존 목록에 game 추가 — 다른 도메인 스키마 유지)
+--     alter role authenticator set pgrst.db_schemas =
+--       'public, graphql_public, crm, thinksalon, chat, game';
+--     notify pgrst, 'reload config';
+--     notify pgrst, 'reload schema';
+--   ⚠ 이 스키마는 다른 도메인과 공유 role 설정이므로 지휘자/guardian 경유로
+--     기존 목록을 보존하며 추가할 것(덮어쓰기 금지).
+
+-- ============================================================================
 -- 끝. 적용 전 guardian 검수 + 유저 승인 필수.
 -- ============================================================================

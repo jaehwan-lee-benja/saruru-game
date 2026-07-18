@@ -83,11 +83,14 @@ html, body {
 /* ---- 워드마크 로고 (Galmuri · 사르르=NAVY, 목장=BERRY) ---- */
 .wordmark {
   margin-top: 18px;
-  font-family: var(--pixel-font-title);
-  font-size: 26px;
-  letter-spacing: 1px;
-  line-height: 1;
   text-align: center;
+}
+.wordmark-img {
+  height: 26px;
+  width: auto;
+  max-width: 72%;
+  display: inline-block;
+  vertical-align: middle;
 }
 .wordmark .wm-a { color: var(--navy); }
 .wordmark .wm-b { color: var(--berry); }
