@@ -1,54 +1,65 @@
-/* 로그인 UI 배선 (M2 1단계 — 로그인만)
+/* 로그인 UI 배선 (M2 — 카카오 + 구글)
  *
- * 지금은 "카카오 로그인 작동"만 붙인다. 로그인은 game 스키마 없이도 된다(인증만).
- * 닉네임 모달 · 온라인 랭킹은 game 스키마 승인·적용 후 game.js에 이어붙인다.
- *   → 그때까지 로그인한 사용자에게는 "랭킹 준비 중"으로 안내한다.
- *
- * SaruruAuth(m2-auth.js)의 공개 API에만 의존한다.
+ * 상단바 버튼: 미로그인 → 로그인 모달 열기 / 로그인 → 로그아웃.
+ * 로그인 모달에서 카카오·구글 중 선택. 둘 다 Supabase에 provider 설정됨(구글은 백오피스와 공유).
+ * 로그인은 game 스키마 없이도 작동(인증만). 닉네임·랭킹은 스키마 승인 후 game.js에 이어붙인다.
  */
 (function () {
   "use strict";
 
   var btn = document.getElementById("btn-login");
   var who = document.getElementById("who");
+  var modal = document.getElementById("login-modal");
   if (!btn || !window.SaruruAuth) return;
 
   var state = { user: null, player: null };
 
-  // 로그인 상태에 따라 버튼·라벨 갱신
+  function openModal() { if (modal) modal.classList.remove("hidden"); }
+  function closeModal() { if (modal) modal.classList.add("hidden"); }
+
   SaruruAuth.onAuth(function (s) {
     state.user = s.user;
     state.player = s.player;
     if (s.user) {
-      btn.textContent = "↩";
+      btn.textContent = "로그아웃";
+      btn.classList.add("logged-in");
       btn.title = "로그아웃";
       btn.setAttribute("aria-label", "로그아웃");
-      // 닉네임이 있으면 닉네임, 없으면(스키마 전) "로그인됨"
       who.textContent = s.player ? s.player.nickname : "로그인됨";
       who.hidden = false;
+      closeModal();
     } else {
-      btn.textContent = "🔑";
-      btn.title = "카카오 로그인";
-      btn.setAttribute("aria-label", "카카오 로그인");
+      btn.textContent = "로그인";
+      btn.classList.remove("logged-in");
+      btn.title = "로그인";
+      btn.setAttribute("aria-label", "로그인");
       who.hidden = true;
       who.textContent = "";
     }
   });
 
+  // 상단바 버튼: 로그인 상태면 로그아웃, 아니면 로그인 모달
   btn.addEventListener("click", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (state.user) {
-      SaruruAuth.logout();
-    } else {
-      // 클릭 → 카카오 로그인 페이지로 리다이렉트(돌아오면 세션 복원)
-      SaruruAuth.loginKakao().then(function (r) {
-        if (!r.ok) {
-          who.hidden = false;
-          who.textContent = "로그인 오류";
-          console.warn("[auth-ui] 로그인 실패", r.error);
-        }
-      });
-    }
+    e.preventDefault(); e.stopPropagation();
+    if (state.user) SaruruAuth.logout();
+    else openModal();
   });
+
+  // 모달 배경 클릭 → 닫기
+  if (modal) modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
+  var closeBtn = document.getElementById("login-close");
+  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+
+  function wire(id, fn) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("click", function () {
+      fn().then(function (r) {
+        if (!r.ok) { console.warn("[auth-ui] 로그인 실패", r.error); }
+        // ok면 브라우저가 OAuth로 리다이렉트됨
+      });
+    });
+  }
+  wire("login-kakao", function () { return SaruruAuth.loginKakao(); });
+  wire("login-google", function () { return SaruruAuth.loginGoogle(); });
 })();

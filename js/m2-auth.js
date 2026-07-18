@@ -132,6 +132,25 @@
     }
   }
 
+  // ---- Google 로그인 ------------------------------------------------------
+  // 구글은 Supabase에 이미 provider 설정됨(백오피스와 공유). email/profile 기본 scope라
+  // 별도 동의항목/검수 없이 바로 된다. redirectTo만 지정.
+  async function loginGoogle() {
+    if (!client) { console.warn("[SaruruAuth] 미초기화"); return { ok: false, error: "not_ready" }; }
+    const redirectTo = window.location.origin + window.location.pathname;
+    try {
+      const { error } = await client.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+      if (error) { console.warn("[SaruruAuth] google 로그인 오류", error); return { ok: false, error: error.message }; }
+      return { ok: true };
+    } catch (e) {
+      console.warn("[SaruruAuth] google 로그인 예외", e);
+      return { ok: false, error: "oauth_failed" };
+    }
+  }
+
   async function logout() {
     if (!client) return { ok: true };
     try { await client.auth.signOut(); } catch (e) { console.warn(e); }
@@ -247,7 +266,7 @@
 
   // ---- 전역 노출 ----------------------------------------------------------
   window.SaruruAuth = {
-    init, onAuth, loginKakao, logout,
+    init, onAuth, loginKakao, loginGoogle, logout,
     checkNickname, setNickname,
     submitScore, getLeaderboard,
     getState,
