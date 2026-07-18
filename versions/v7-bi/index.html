@@ -104,6 +104,7 @@
     <div class="util-bar">
       <button id="btn-login" class="util-btn" type="button" aria-label="로그인">로그인</button>
       <span id="who" class="who" hidden></span>
+      <button id="btn-rank" class="util-btn" type="button">🏆 랭킹</button>
       <button id="btn-mute" class="util-btn icon" type="button" aria-label="소리 켜기/끄기" title="소리">🔊</button>
       <button id="btn-bug" class="util-btn" type="button">🐞 버그 신고</button>
     </div>
@@ -115,6 +116,19 @@
     <footer class="footer">
       <span>프레시 밀크 · 아이스크림</span>
     </footer>
+  </div>
+
+  <!-- 랭킹 보기 -->
+  <div id="rank-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>🏆 랭킹</h2>
+      <div class="rank-tabs" id="rank-modal-tabs">
+        <button class="rank-tab on" data-period="week" type="button">주간</button>
+        <button class="rank-tab" data-period="all" type="button">전체</button>
+      </div>
+      <ol id="rank-modal-list" class="rank-list"></ol>
+      <button id="rank-modal-close" class="btn btn-ghost" type="button">닫기</button>
+    </div>
   </div>
 
   <!-- 로그인 선택 -->
@@ -168,16 +182,16 @@
 
   <!-- 계정 레이어 (M2) — supabase-js v2 CDN + 로그인 모듈 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="./js/m2-auth.js?v=20260718d"></script>
+  <script src="./js/m2-auth.js?v=20260718e"></script>
   <script>
     // anon(publishable) 키는 브라우저 노출이 정상인 public-safe 값. service_role 아님.
     const SUPABASE_URL = "https://rstazttwlghsorpzsugy.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_uK9OlDkemSL4S6yXFhTqpA_RngpzhiR";
     window.SaruruAuth && SaruruAuth.init(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
-  <script src="./js/auth-ui.js?v=20260718d"></script>
+  <script src="./js/auth-ui.js?v=20260718e"></script>
 
-  <script src="./js/game.js?v=20260718d"></script>
-  <script src="./js/bug-report.js?v=20260718d"></script>
+  <script src="./js/game.js?v=20260718e"></script>
+  <script src="./js/bug-report.js?v=20260718e"></script>
 </body>
 </html>

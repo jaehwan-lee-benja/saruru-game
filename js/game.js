@@ -555,27 +555,17 @@
   // ===== 온라인 랭킹 (M2 · SaruruAuth 있을 때만) =====
   const rankPanel = document.getElementById('rank-panel');
   const rankList = document.getElementById('rank-list');
-  let rankPeriod = 'week';
-  function submitAndShowRank(fs) {
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  // 공용 리더보드 렌더 — 게임오버 패널과 '랭킹 보기' 모달이 함께 쓴다
+  function renderRankInto(listEl, period) {
     const A = window.SaruruAuth;
-    if (!A || !rankPanel) return;
-    const st = A.getState();
-    if (!st.user || !st.player) { rankPanel.classList.add('hidden'); return; } // 로그인+닉네임 있어야
-    // 점수 제출은 서버 치트검증 경유 — 실패해도 게임 흐름 안 막음
-    A.submitScore(fs, Math.floor(playT * 1000), 'ddong').then((r) => {
-      if (r.ok && r.best > best) { best = r.best; localStorage.setItem(BEST_KEY, String(best)); el.best.textContent = best; }
-      loadRank();
-    });
-  }
-  function loadRank() {
-    const A = window.SaruruAuth;
-    if (!A || !rankPanel || !rankList) return;
-    rankPanel.classList.remove('hidden');
-    rankList.innerHTML = '<li class="rank-loading">불러오는 중…</li>';
-    A.getLeaderboard('ddong', rankPeriod, 10).then(({ rows }) => {
-      const myNick = A.getState().player && A.getState().player.nickname;
-      if (!rows || !rows.length) { rankList.innerHTML = '<li class="rank-empty">아직 기록이 없어요. 첫 주인공이 되어보세요!</li>'; return; }
-      rankList.innerHTML = rows.map((r, i) => {
+    if (!A || !listEl) return;
+    listEl.innerHTML = '<li class="rank-loading">불러오는 중…</li>';
+    A.getLeaderboard('ddong', period, 20).then(({ rows }) => {
+      const st = A.getState();
+      const myNick = st.player && st.player.nickname;
+      if (!rows || !rows.length) { listEl.innerHTML = '<li class="rank-empty">아직 기록이 없어요. 첫 주인공이 되어보세요!</li>'; return; }
+      listEl.innerHTML = rows.map((r, i) => {
         const me = myNick && r.nickname === myNick ? ' me' : '';
         return '<li class="rank-row' + me + '"><span class="rk-no">' + (i + 1) + '</span>' +
                '<span class="rk-nick">' + escapeHtml(r.nickname) + '</span>' +
@@ -583,16 +573,48 @@
       }).join('');
     });
   }
-  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-  // 주간/전체 탭
-  document.querySelectorAll('.rank-tab').forEach((t) => {
+
+  // 게임오버 화면: 점수 제출 + 리더보드
+  let overPeriod = 'week';
+  function submitAndShowRank(fs) {
+    const A = window.SaruruAuth;
+    if (!A || !rankPanel) return;
+    const st = A.getState();
+    if (!st.user || !st.player) { rankPanel.classList.add('hidden'); return; } // 로그인+닉네임 있어야
+    A.submitScore(fs, Math.floor(playT * 1000), 'ddong').then((r) => {
+      if (r.ok && r.best > best) { best = r.best; localStorage.setItem(BEST_KEY, String(best)); el.best.textContent = best; }
+      rankPanel.classList.remove('hidden');
+      renderRankInto(rankList, overPeriod);
+    });
+  }
+  document.querySelectorAll('#rank-panel .rank-tab').forEach((t) => {
     t.addEventListener('click', () => {
-      document.querySelectorAll('.rank-tab').forEach((x) => x.classList.remove('on'));
+      document.querySelectorAll('#rank-panel .rank-tab').forEach((x) => x.classList.remove('on'));
       t.classList.add('on');
-      rankPeriod = t.getAttribute('data-period') === 'all' ? 'all' : 'week';
-      loadRank();
+      overPeriod = t.getAttribute('data-period') === 'all' ? 'all' : 'week';
+      renderRankInto(rankList, overPeriod);
     });
   });
+
+  // '랭킹 보기' 모달 (하단 버튼 · 게임 안 해도 순위 열람)
+  const rankModal = document.getElementById('rank-modal');
+  const rankModalList = document.getElementById('rank-modal-list');
+  const btnRank = document.getElementById('btn-rank');
+  let modalPeriod = 'week';
+  if (btnRank && rankModal) {
+    btnRank.addEventListener('click', () => { rankModal.classList.remove('hidden'); renderRankInto(rankModalList, modalPeriod); });
+    rankModal.addEventListener('click', (e) => { if (e.target === rankModal) rankModal.classList.add('hidden'); });
+    const rc = document.getElementById('rank-modal-close');
+    if (rc) rc.addEventListener('click', () => rankModal.classList.add('hidden'));
+    document.querySelectorAll('#rank-modal-tabs .rank-tab').forEach((t) => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('#rank-modal-tabs .rank-tab').forEach((x) => x.classList.remove('on'));
+        t.classList.add('on');
+        modalPeriod = t.getAttribute('data-period') === 'all' ? 'all' : 'week';
+        renderRankInto(rankModalList, modalPeriod);
+      });
+    });
+  }
   function updateHud() {
     el.score.textContent = Math.floor(score);
     el.lives.textContent = '♥'.repeat(Math.max(0, lives)) || '·';
