@@ -514,7 +514,7 @@
     const nb = fs > best;
     if (nb) { best = fs; localStorage.setItem(BEST_KEY, String(best)); el.best.textContent = best; }
     el.finalScore.textContent = fs;
-    el.bestLine.textContent = nb ? '★ NEW BEST! 사르르목장 최고기록 ★' : 'BEST ' + best;
+    el.bestLine.textContent = nb ? '★ 새 최고기록! 사르르목장 신기록 ★' : '최고 ' + best;
     el.over.classList.remove('hidden');
     SFX.over();
   }
