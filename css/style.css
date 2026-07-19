@@ -201,7 +201,7 @@ html, body {
   text-align: center;
   box-shadow: 4px 4px 0 var(--sky);
 }
-.hud-label { display: block; font-size: 9px; color: var(--navy-soft); letter-spacing: 1px; }
+.hud-label { display: block; font-size: 8.5px; color: var(--navy-soft); letter-spacing: 0.5px; white-space: nowrap; }
 .hud-value { display: block; font-size: 16px; margin-top: 4px; color: var(--navy); }
 .hud-item.lives .hud-value { color: var(--berry); letter-spacing: 1px; }
 /* HUD 안의 일시정지 버튼 — 스코어/베스트/라이프와 같은 칸 스타일 */
