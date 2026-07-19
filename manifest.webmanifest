@@ -1,0 +1,22 @@
+{
+  "id": "./",
+  "name": "사르르목장 · 젖소 똥피하기",
+  "short_name": "똥피하기",
+  "description": "사르르목장 레트로 픽셀 미니게임 — 우리 젖소 마스코트가 소똥을 피하고 우유·아이스크림을 모아요!",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "orientation": "portrait",
+  "background_color": "#f5f3ef",
+  "theme_color": "#385088",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

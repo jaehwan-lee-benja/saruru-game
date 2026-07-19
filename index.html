@@ -7,6 +7,14 @@
   <title>사르르목장 · 젖소 똥피하기</title>
   <meta name="description" content="사르르목장 레트로 픽셀 미니게임 — 우리 젖소 마스코트가 소똥을 피하고 우유·아이스크림을 모아요!" />
   <link rel="icon" href="./assets/logo.png" />
+  <!-- PWA (설치형 웹앱) -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="똥피하기" />
+  <meta name="application-name" content="똥피하기" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css" />
   <link rel="stylesheet" href="./css/style.css?v=20260718i" />
@@ -205,5 +213,16 @@
 
   <!-- 카카오 애드핏 배너 SDK (하단 배너 광고 로더) -->
   <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
+
+  <!-- PWA 서비스워커 등록 (설치·오프라인) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js').catch(function (e) {
+          console.warn('[PWA] SW 등록 실패:', e);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
