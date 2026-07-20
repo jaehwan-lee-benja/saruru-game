@@ -251,7 +251,8 @@
 
   <!-- PWA 서비스워커 등록 (설치·오프라인) -->
   <script>
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && !(window.SARURU && window.SARURU.isDev)) {
+      // dev는 SW 미등록(캐시 staleness로 개발 방해 방지). prod만 설치형/오프라인.
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('./sw.js').catch(function (e) {
           console.warn('[PWA] SW 등록 실패:', e);
