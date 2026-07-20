@@ -657,8 +657,9 @@
   function addPopup(x, y, txt, color, big) {
     sparks.push({ x, y, txt, color, vx: 0, vy: -0.55, life: 1.3, big });
   }
-  let flashT = 0, flashMax = 1, flashCol = '#ffffff';
-  function flash(color, amt) { flashCol = color || '#ffffff'; flashT = amt || 0.15; flashMax = flashT; }
+  let flashT = 0, flashMax = 1, flashCol = '#ffffff', flashPeak = 0.5;
+  // peak = 화면 오버레이 최대 알파(효과별로 조절). 미지정 시 0.5.
+  function flash(color, amt, peak) { flashCol = color || '#ffffff'; flashT = amt || 0.15; flashMax = flashT; flashPeak = (peak == null ? 0.5 : peak); }
 
   // ===== 업데이트 =====
   let playT = 0;   // 플레이 경과(난이도) — elapsed는 애니용(대기 중에도 흐름)
@@ -703,12 +704,12 @@
           addPopup(cx, PLAYER_Y - 48, '+' + it.points, t ? '#e07d94' : '#385088', t >= 1);
           burst(cx, cy, it.glow || '#ffffff', 6 + t * 10, 0.8 + t * 0.8);
           burst(cx, cy, '#ffffff', 3 + t * 5, 0.5);
-          flash(it.glow, 0.10 + t * 0.12);
+          flash(it.glow, 0.10 + t * 0.12, 0.18);  // 획득 flash는 은은하게(흰 화면 깜박임 방지)
           SFX.collect(t);
         } else if (invuln <= 0) {
           lives -= 1; invuln = 1000;
           burst(player.x, PLAYER_Y - 22, '#a8763f', 9, 1.1);
-          flash('#e07d94', 0.24);
+          flash('#e07d94', 0.24, 0.42);  // 피격은 핑크로 좀 더 뚜렷하게(피드백 유지)
           SFX.hit();
           if (lives <= 0) { items.splice(i, 1); updateHud(); gameOver(); return; }
         } else { continue; }
@@ -873,7 +874,7 @@
     }
     ctx.globalAlpha = 1;
     if (flashT > 0) {
-      ctx.globalAlpha = Math.max(0, Math.min(0.5, (flashT / flashMax) * 0.5));
+      ctx.globalAlpha = Math.max(0, Math.min(flashPeak, (flashT / flashMax) * flashPeak));
       ctx.fillStyle = flashCol;
       ctx.fillRect(0, 0, VW, VH);
       ctx.globalAlpha = 1;
