@@ -83,7 +83,7 @@
         // ★세션 저장소 분리: GitHub Pages는 모든 사이트가 같은 origin
         // (jaehwan-lee-benja.github.io)이라, 이 키가 없으면 백오피스(crm 등) 세션과
         // localStorage를 공유해 로그인이 뒤섞인다. 게임 전용 키로 독립 사이트로 분리한다.
-        storageKey: "sb-saruru-game-auth",
+        storageKey: (window.SARURU && window.SARURU.authStorageKey) || "sb-saruru-game-auth",
       },
     });
     _ready = true;

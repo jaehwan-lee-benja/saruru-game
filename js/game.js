@@ -44,7 +44,8 @@
     pad: document.getElementById('pad'),
   };
 
-  const BEST_KEY = 'saruru.ddong.best';
+  const GAME_KEY = (window.SARURU && window.SARURU.gameKey) || 'ddong';  // dev면 ddong_dev(랭킹/통계 격리)
+  const BEST_KEY = 'saruru.' + GAME_KEY + '.best';
   const HAT_KEY = 'saruru.ddong.hat';
   let best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
   el.best.textContent = best;
@@ -568,7 +569,7 @@
     const A = window.SaruruAuth;
     if (!A || !listEl) return;
     listEl.innerHTML = '<li class="rank-loading">불러오는 중…</li>';
-    A.getLeaderboard('ddong', period, 20).then(({ rows }) => {
+    A.getLeaderboard(GAME_KEY, period, 20).then(({ rows }) => {
       const st = A.getState();
       const myNick = st.player && st.player.nickname;
       if (!rows || !rows.length) { listEl.innerHTML = '<li class="rank-empty">아직 기록이 없어요. 첫 주인공이 되어보세요!</li>'; return; }
@@ -588,7 +589,7 @@
     if (!A || !rankPanel) return;
     const st = A.getState();
     if (!st.user || !st.player) { rankPanel.classList.add('hidden'); return; } // 로그인+닉네임 있어야
-    A.submitScore(fs, Math.floor(playT * 1000), 'ddong').then((r) => {
+    A.submitScore(fs, Math.floor(playT * 1000), GAME_KEY).then((r) => {
       if (r.ok && r.best > best) { best = r.best; localStorage.setItem(BEST_KEY, String(best)); el.best.textContent = best; }
       rankPanel.classList.remove('hidden');
       renderRankInto(rankList, overPeriod);

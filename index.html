@@ -6,6 +6,31 @@
   <meta name="theme-color" content="#385088" />
   <title>사르르목장 · 젖소 똥피하기</title>
   <meta name="description" content="사르르목장 레트로 픽셀 미니게임 — 우리 젖소 마스코트가 소똥을 피하고 우유·아이스크림을 모아요!" />
+  <script>
+    // ── 환경 자동 감지 (dev/prod 동일 코드, 동작만 분기) ──
+    // dev: 로컬 or 경로/호스트에 'saruru-game-dev' 포함. ?env=dev|prod 로 강제 override.
+    window.SARURU = (function () {
+      var forced = /[?&]env=(dev|prod)/.exec(location.search);
+      var host = location.hostname, path = location.pathname;
+      var isDev = forced ? forced[1] === 'dev'
+        : (host === 'localhost' || host === '127.0.0.1'
+           || /saruru-game-dev/.test(path) || /saruru-game-dev/.test(host));
+      return {
+        env: isDev ? 'dev' : 'prod', isDev: isDev,
+        gameKey: isDev ? 'ddong_dev' : 'ddong',           // Edge Function 정규식 [a-z0-9_] 준수(하이픈 금지)
+        authStorageKey: isDev ? 'sb-saruru-game-dev-auth' : 'sb-saruru-game-auth',
+        ads: !isDev,                                        // dev = 애드핏 OFF(광고계정 보호)
+      };
+    })();
+    if (window.SARURU.isDev) {
+      window.addEventListener('DOMContentLoaded', function () {
+        var b = document.createElement('div');
+        b.textContent = 'DEV · ' + window.SARURU.gameKey;
+        b.style.cssText = 'position:fixed;top:6px;left:6px;z-index:99999;background:#c0392b;color:#fff;font:700 11px/1 monospace;padding:5px 8px;border-radius:6px;opacity:.92;pointer-events:none';
+        document.body.appendChild(b);
+      });
+    }
+  </script>
   <link rel="icon" href="./assets/logo.png" />
   <!-- PWA (설치형 웹앱) -->
   <link rel="manifest" href="./manifest.webmanifest" />
@@ -199,7 +224,7 @@
 
   <!-- 계정 레이어 (M2) — supabase-js v2 CDN + 로그인 모듈 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="./js/m2-auth.js?v=20260718i"></script>
+  <script src="./js/m2-auth.js?v=20260720c"></script>
   <script>
     // anon(publishable) 키는 브라우저 노출이 정상인 public-safe 값. service_role 아님.
     const SUPABASE_URL = "https://rstazttwlghsorpzsugy.supabase.co";
@@ -208,11 +233,21 @@
   </script>
   <script src="./js/auth-ui.js?v=20260718i"></script>
 
-  <script src="./js/game.js?v=20260720b"></script>
+  <script src="./js/game.js?v=20260720c"></script>
   <script src="./js/bug-report.js?v=20260718i"></script>
 
-  <!-- 카카오 애드핏 배너 SDK (하단 배너 광고 로더) -->
-  <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
+  <!-- 카카오 애드핏 배너 SDK — prod에서만 로드(dev는 광고 OFF·슬롯 숨김) -->
+  <script>
+    if (window.SARURU && window.SARURU.ads) {
+      var _ad = document.createElement('script');
+      _ad.type = 'text/javascript';
+      _ad.src = '//t1.kakaocdn.net/kas/static/ba.min.js'; _ad.async = true;
+      document.body.appendChild(_ad);
+    } else {
+      var _slot = document.querySelector('.ad-slot');
+      if (_slot) _slot.style.display = 'none';
+    }
+  </script>
 
   <!-- PWA 서비스워커 등록 (설치·오프라인) -->
   <script>
