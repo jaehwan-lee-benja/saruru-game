@@ -389,7 +389,7 @@
   const player = { x: VW / 2, w: 26, speed: 3.1, vx: 0 };  // w=26 = 얼굴 코어(40px 전체 아님)
   let items = [];
   let sparks = [];
-  let score = 0, lives = 2, elapsed = 0, spawnTimer = 0, invuln = 0, lastTime = 0;
+  let score = 0, lives = 3, elapsed = 0, spawnTimer = 0, invuln = 0, lastTime = 0;
   const clouds = [{ x: 34, y: 42, s: 0.11 }, { x: 134, y: 22, s: 0.07 }, { x: 196, y: 64, s: 0.09 }];
   const input = { left: false, right: false, targetX: null };
 
@@ -519,7 +519,7 @@
     state = 'playing';
     items = []; sparks = [];
     // playT = 난이도 시계. 이걸 안 지우면 재시작해도 이전 판의 속도가 그대로 넘어온다.
-    score = 0; lives = 2; spawnTimer = 0; invuln = 0; playT = 0;
+    score = 0; lives = 3; spawnTimer = 0; invuln = 0; playT = 0;
     player.x = VW / 2; player.vx = 0;
     input.targetX = null;
     el.start.classList.add('hidden');
