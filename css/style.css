@@ -481,12 +481,12 @@ html, body {
 }
 .biz-info {
   display: block;
-  margin-top: 7px;
-  font-size: 8.5px;
-  line-height: 1.6;
-  letter-spacing: .3px;
-  color: var(--navy-soft);
-  opacity: .85;
+  margin-top: 10px;
+  font-size: 10px;
+  line-height: 1.7;
+  letter-spacing: .2px;
+  color: var(--navy);
+  opacity: 1;
 }
 
 /* 하단 배너 광고 슬롯 (카카오 애드핏 320x100) — 게임 캔버스 밖 여백에 위치 */
