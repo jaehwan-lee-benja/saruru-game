@@ -42,7 +42,7 @@
   <meta name="application-name" content="똥피하기" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css" />
-  <link rel="stylesheet" href="./css/style.css?v=20260720e" />
+  <link rel="stylesheet" href="./css/style.css?v=20260721a" />
 </head>
 <body>
   <div id="app">
@@ -153,11 +153,20 @@
     </footer>
 
     <!-- 하단 배너 광고 (카카오 애드핏 · 320x100 · 게임 캔버스 밖 여백) -->
+    <!-- 광고 no-fill 시 data-ad-onfail 콜백이 아래 폴백 캠페인 배너를 노출 -->
     <div class="ad-slot" aria-label="광고">
       <ins class="kakao_ad_area" style="display:none;"
            data-ad-unit="DAN-RUeXBqqfwpay1stL"
            data-ad-width="320"
-           data-ad-height="100"></ins>
+           data-ad-height="100"
+           data-ad-onfail="saruruAdFallback"></ins>
+      <div class="ad-fallback" role="img" aria-label="행복이 사르르 · 사르르목장" hidden>
+        <span class="af-icon">🍦</span>
+        <span class="af-text">
+          <b class="af-title">행복이 <em>사르르</em></b>
+          <span class="af-sub">사르르목장 · 프레시 밀크 &amp; 아이스크림</span>
+        </span>
+      </div>
     </div>
   </div>
 
@@ -238,16 +247,36 @@
   <script src="./js/bug-report.js?v=20260718i"></script>
 
   <!-- 카카오 애드핏 배너 SDK — prod에서만 로드(dev는 광고 OFF·슬롯 숨김) -->
+  <!-- 광고 no-fill 시 "행복이 사르르" 캠페인 폴백 배너로 자리 채움 -->
   <script>
-    if (window.SARURU && window.SARURU.ads) {
-      var _ad = document.createElement('script');
-      _ad.type = 'text/javascript';
-      _ad.src = '//t1.kakaocdn.net/kas/static/ba.min.js'; _ad.async = true;
-      document.body.appendChild(_ad);
-    } else {
-      var _slot = document.querySelector('.ad-slot');
-      if (_slot) _slot.style.display = 'none';
-    }
+    (function () {
+      var slot = document.querySelector('.ad-slot');
+      var ins  = slot && slot.querySelector('.kakao_ad_area');
+      var fb   = slot && slot.querySelector('.ad-fallback');
+      function showFallback() { if (fb) fb.hidden = false; }
+      function hideFallback() { if (fb) fb.hidden = true; }
+      // 애드핏 no-fill 콜백 (ins data-ad-onfail 에서 이 이름을 참조)
+      window.saruruAdFallback = showFallback;
+
+      if (window.SARURU && window.SARURU.ads) {
+        // 광고가 실제로 채워지면(iframe 삽입) 폴백 숨김 — 느린 fill 대비
+        if (ins && window.MutationObserver) {
+          new MutationObserver(function () {
+            if (ins.querySelector('iframe')) hideFallback();
+          }).observe(ins, { childList: true, subtree: true });
+        }
+        var _ad = document.createElement('script');
+        _ad.type = 'text/javascript';
+        _ad.src = '//t1.kakaocdn.net/kas/static/ba.min.js'; _ad.async = true;
+        document.body.appendChild(_ad);
+        // 백업: onfail 미발화 대비 — 4초 내 광고 iframe 없으면 폴백 노출
+        setTimeout(function () {
+          if (!ins || !ins.querySelector('iframe')) showFallback();
+        }, 4000);
+      } else if (slot) {
+        slot.style.display = 'none'; // dev: 광고·폴백 모두 숨김
+      }
+    })();
   </script>
 
   <!-- PWA 서비스워커 등록 (설치·오프라인) -->

@@ -500,3 +500,43 @@ html, body {
   justify-content: center;
 }
 .ad-slot .kakao_ad_area { max-width: 100%; }
+
+/* no-fill 폴백 캠페인 배너 — "행복이 사르르" (광고 미출력 시 자리 채움) */
+.ad-fallback {
+  width: 320px;
+  max-width: 100%;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  border: 2px solid var(--navy);
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--milk) 0%, var(--cream) 55%, var(--sky-soft) 100%);
+  box-shadow: 3px 3px 0 var(--sky);
+  overflow: hidden;
+  user-select: none;
+}
+.ad-fallback[hidden] { display: none; }
+.ad-fallback .af-icon {
+  font-size: 34px;
+  line-height: 1;
+  flex: 0 0 auto;
+  filter: drop-shadow(1px 1px 0 var(--sky));
+}
+.ad-fallback .af-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ad-fallback .af-title {
+  font-family: var(--pixel-font-title);
+  font-size: 19px;
+  color: var(--navy);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.ad-fallback .af-title em { font-style: normal; color: var(--berry); }
+.ad-fallback .af-sub {
+  font-size: 9px;
+  color: var(--navy-soft);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
