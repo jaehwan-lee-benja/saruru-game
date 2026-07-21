@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#385088" />
+  <title>사르르목장 · 젖소 똥피하기</title>
+  <meta name="description" content="사르르목장 레트로 픽셀 미니게임 — 우리 젖소 마스코트가 소똥을 피하고 우유·아이스크림을 모아요!" />
+  <script>
+    // ── 환경 자동 감지 (dev/prod 동일 코드, 동작만 분기) ──
+    // dev: 로컬 or 경로/호스트에 'saruru-game-dev' 포함. ?env=dev|prod 로 강제 override.
+    window.SARURU = (function () {
+      var forced = /[?&]env=(dev|prod)/.exec(location.search);
+      var host = location.hostname, path = location.pathname;
+      var isDev = forced ? forced[1] === 'dev'
+        : (host === 'localhost' || host === '127.0.0.1'
+           || /saruru-game-dev/.test(path) || /saruru-game-dev/.test(host));
+      return {
+        env: isDev ? 'dev' : 'prod', isDev: isDev,
+        gameKey: isDev ? 'ddong_dev' : 'ddong',           // Edge Function 정규식 [a-z0-9_] 준수(하이픈 금지)
+        authStorageKey: isDev ? 'sb-saruru-game-dev-auth' : 'sb-saruru-game-auth',
+        ads: !isDev,                                        // dev = 애드핏 OFF(광고계정 보호)
+      };
+    })();
+    if (window.SARURU.isDev) {
+      window.addEventListener('DOMContentLoaded', function () {
+        var b = document.createElement('div');
+        b.textContent = 'DEV · ' + window.SARURU.gameKey;
+        b.style.cssText = 'position:fixed;top:6px;left:6px;z-index:99999;background:#c0392b;color:#fff;font:700 11px/1 monospace;padding:5px 8px;border-radius:6px;opacity:.92;pointer-events:none';
+        document.body.appendChild(b);
+      });
+    }
+  </script>
+  <link rel="icon" href="./assets/logo.png" />
+  <!-- PWA (설치형 웹앱) — 스냅샷 아카이브에선 manifest 미포함(루트 최종본에만 존재) -->
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="똥피하기" />
+  <meta name="application-name" content="똥피하기" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css" />
+  <link rel="stylesheet" href="./css/style.css?v=20260721a" />
+</head>
+<body>
+  <div id="app">
+    <main class="stage-wrap">
+      <div class="hud">
+        <div class="hud-item">
+          <span class="hud-label">점수</span>
+          <span id="score" class="hud-value">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">나의 최고</span>
+          <span id="best" class="hud-value">0</span>
+        </div>
+        <div class="hud-item lives">
+          <span class="hud-label">목숨</span>
+          <span id="lives" class="hud-value">♥♥♥</span>
+        </div>
+        <button id="btn-pause" class="hud-item hud-btn" type="button" aria-label="일시정지">
+          <span class="hud-label">일시정지</span>
+          <span class="hud-value">⏸</span>
+        </button>
+      </div>
+
+      <div class="canvas-frame">
+        <canvas id="game" width="224" height="336"></canvas>
+
+        <!-- 웰컴/로그인 화면 (미로그인 시 · 사르르 놀이동산 브랜드) -->
+        <div id="overlay-welcome" class="overlay">
+          <div class="card welcome-card">
+            <canvas id="welcome-face" width="40" height="42" class="welcome-face"></canvas>
+            <h1 class="welcome-title"><span class="wm-a">사르르</span><br /><span class="wm-b">놀이동산</span></h1>
+            <p class="lead">로그인하고<br /><b>미니게임과 랭킹</b>을 즐겨보세요!</p>
+            <button id="welcome-kakao" class="social-btn kakao" type="button">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#191919" d="M12 3C6.48 3 2 6.53 2 10.9c0 2.82 1.87 5.3 4.68 6.7-.15.53-.79 2.8-.83 2.98-.05.24.09.24.19.17.08-.05 2.6-1.77 3.69-2.51.68.1 1.38.15 2.27.15 5.52 0 10-3.53 10-7.9C22 6.53 17.52 3 12 3z"/></svg>
+              <span>카카오로 시작하기</span>
+            </button>
+            <button id="welcome-google" class="social-btn google" type="button">
+              <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              <span>Google로 시작하기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 시작 화면 (로그인 후) -->
+        <div id="overlay-start" class="overlay hidden">
+          <div class="card">
+            <h1>젖소 똥피하기</h1>
+            <p class="lead">우리 젖소가 <b>소똥</b>을 피하고<br /><b>우유·아이스크림</b>을 모아요!</p>
+            <p class="pick-label">모자 고르기</p>
+            <div id="hat-pick" class="hat-pick"></div>
+            <button id="btn-start" class="btn btn-primary">▶ 시작하기</button>
+            <p class="hint">화면을 좌우로 <b>터치·드래그</b><br />(PC는 ← → 방향키)</p>
+          </div>
+        </div>
+
+        <!-- 게임오버 화면 -->
+        <div id="overlay-over" class="overlay hidden">
+          <div class="card">
+            <div class="over-badge" id="over-badge">게임<br>오버</div>
+            <p class="score-line">점수 <b id="final-score">0</b></p>
+            <p class="best-line" id="best-line"></p>
+            <!-- 랭킹 패널 (로그인 시 노출) -->
+            <div id="rank-panel" class="rank-panel hidden">
+              <div class="rank-tabs">
+                <button class="rank-tab on" data-period="week" type="button">주간</button>
+                <button class="rank-tab" data-period="all" type="button">전체</button>
+              </div>
+              <ol id="rank-list" class="rank-list"></ol>
+            </div>
+            <button id="btn-retry" class="btn btn-primary">↻ 다시하기</button>
+          </div>
+        </div>
+
+        <!-- 일시정지 화면 -->
+        <div id="overlay-pause" class="overlay hidden">
+          <div class="card">
+            <h1>일시정지</h1>
+            <p class="lead">점수는 그대로 있어요.<br />천천히 다녀오세요!</p>
+            <button id="btn-resume" class="btn btn-primary">▶ 계속하기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 컨트롤 패드 — 캐릭터 아래라 엄지가 화면을 가리지 않는다 -->
+      <div id="pad" class="pad" role="slider" aria-label="좌우 이동 컨트롤">
+        <i class="pad-glow" aria-hidden="true"></i>
+        <span class="pad-hint">◀ 여기를 좌우로 드래그 ▶</span>
+      </div>
+    </main>
+
+    <!-- 하단 유틸 바 — 로그인 · 소리 · 버그신고 한 줄 -->
+    <div class="util-bar">
+      <button id="btn-login" class="util-btn" type="button" aria-label="로그인">로그인</button>
+      <button id="who" class="who" type="button" hidden aria-label="닉네임 변경" title="닉네임 변경"></button>
+      <button id="btn-rank" class="util-btn" type="button">🏆 랭킹</button>
+      <button id="btn-mute" class="util-btn icon" type="button" aria-label="소리 켜기/끄기" title="소리">🔊</button>
+      <button id="btn-bug" class="util-btn" type="button">🐞 버그 신고</button>
+    </div>
+
+    <!-- 워드마크 로고 (design 제공 · 진짜 오동통 픽셀화 E안 확정 · 네이비 #38528a + 민트 그림자) -->
+    <div class="wordmark" aria-label="사르르목장">
+      <img src="./assets/saruru-wordmark-pixel.png?v=20260719p" alt="사르르목장" class="wordmark-img" />
+    </div>
+    <footer class="footer">
+      <span>프레시 밀크 · 아이스크림</span>
+      <a class="footer-link" href="./privacy.html">개인정보처리방침</a>
+      <div class="biz-info">운영: 자아디자인 · 대표 이재환 · 사업자등록번호 277-15-00583<br />경기도 포천시 영북면 산정호수로 130 나동 · designerbenja@gmail.com</div>
+    </footer>
+
+    <!-- 하단 배너 광고 (카카오 애드핏 · 320x100 · 게임 캔버스 밖 여백) -->
+    <!-- 광고 no-fill 시 data-ad-onfail 콜백이 아래 폴백 캠페인 배너를 노출 -->
+    <div class="ad-slot" aria-label="광고">
+      <ins class="kakao_ad_area" style="display:none;"
+           data-ad-unit="DAN-RUeXBqqfwpay1stL"
+           data-ad-width="320"
+           data-ad-height="100"
+           data-ad-onfail="saruruAdFallback"></ins>
+      <div class="ad-fallback" role="img" aria-label="행복이 사르르 · 사르르목장" hidden>
+        <span class="af-icon">🍦</span>
+        <span class="af-text">
+          <b class="af-title">행복이 <em>사르르</em></b>
+          <span class="af-sub">사르르목장 · 프레시 밀크 &amp; 아이스크림</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 랭킹 보기 -->
+  <div id="rank-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>🏆 랭킹</h2>
+      <div class="rank-tabs" id="rank-modal-tabs">
+        <button class="rank-tab on" data-period="week" type="button">주간</button>
+        <button class="rank-tab" data-period="all" type="button">전체</button>
+      </div>
+      <ol id="rank-modal-list" class="rank-list"></ol>
+      <button id="rank-modal-close" class="btn btn-ghost" type="button">닫기</button>
+    </div>
+  </div>
+
+  <!-- 로그인 선택 -->
+  <div id="login-modal" class="modal hidden">
+    <div class="modal-card login-card">
+      <h2>로그인</h2>
+      <p class="modal-lead">로그인하면 <b>온라인 랭킹</b>에 도전할 수 있어요.<br />게임 기록은 그대로 유지됩니다.</p>
+      <button id="login-kakao" class="social-btn kakao" type="button">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#191919" d="M12 3C6.48 3 2 6.53 2 10.9c0 2.82 1.87 5.3 4.68 6.7-.15.53-.79 2.8-.83 2.98-.05.24.09.24.19.17.08-.05 2.6-1.77 3.69-2.51.68.1 1.38.15 2.27.15 5.52 0 10-3.53 10-7.9C22 6.53 17.52 3 12 3z"/></svg>
+        <span>카카오로 로그인</span>
+      </button>
+      <button id="login-google" class="social-btn google" type="button">
+        <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        <span>Google로 로그인</span>
+      </button>
+      <button id="login-close" class="btn btn-ghost" type="button">닫기</button>
+    </div>
+  </div>
+
+  <!-- 닉네임 입력/변경 -->
+  <div id="nick-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="nick-title">닉네임 정하기</h2>
+      <p class="modal-lead">랭킹에 표시될 이름이에요.<br />2~12자, 한글·영문·숫자.</p>
+      <input id="nick-input" type="text" maxlength="12" placeholder="예: 사르르젖소" autocomplete="off" />
+      <p id="nick-msg" class="nick-msg"></p>
+      <div class="modal-btns">
+        <button id="nick-later" class="btn btn-ghost" type="button">나중에</button>
+        <button id="nick-save" class="btn btn-primary" type="button">확정</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 버그 신고 -->
+  <div id="bug-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>🐞 버그 신고</h2>
+      <p class="modal-lead">이상한 점을 알려주세요. 어떤 상황이었는지 적어주시면 큰 도움이 됩니다.</p>
+      <textarea id="bug-text" rows="5" placeholder="예: 게임오버 후 다시 시작했더니 처음부터 너무 빨라요"></textarea>
+      <details class="bug-info">
+        <summary>함께 보내는 정보</summary>
+        <pre id="bug-meta"></pre>
+      </details>
+      <div class="modal-btns">
+        <button id="bug-cancel" class="btn btn-ghost" type="button">취소</button>
+        <button id="bug-send" class="btn btn-primary" type="button">보내기</button>
+      </div>
+      <p id="bug-msg" class="bug-msg"></p>
+    </div>
+  </div>
+
+  <!-- 계정 레이어 (M2) — supabase-js v2 CDN + 로그인 모듈 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="./js/m2-auth.js?v=20260720c"></script>
+  <script>
+    // anon(publishable) 키는 브라우저 노출이 정상인 public-safe 값. service_role 아님.
+    const SUPABASE_URL = "https://rstazttwlghsorpzsugy.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_uK9OlDkemSL4S6yXFhTqpA_RngpzhiR";
+    window.SaruruAuth && SaruruAuth.init(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+  <script src="./js/auth-ui.js?v=20260718i"></script>
+
+  <script src="./js/game.js?v=20260720c"></script>
+  <script src="./js/bug-report.js?v=20260718i"></script>
+
+  <!-- 카카오 애드핏 배너 SDK — prod에서만 로드(dev는 광고 OFF·슬롯 숨김) -->
+  <!-- 광고 no-fill 시 "행복이 사르르" 캠페인 폴백 배너로 자리 채움 -->
+  <script>
+    (function () {
+      var slot = document.querySelector('.ad-slot');
+      var ins  = slot && slot.querySelector('.kakao_ad_area');
+      var fb   = slot && slot.querySelector('.ad-fallback');
+      function showFallback() { if (fb) fb.hidden = false; }
+      function hideFallback() { if (fb) fb.hidden = true; }
+      // 애드핏 no-fill 콜백 (ins data-ad-onfail 에서 이 이름을 참조)
+      window.saruruAdFallback = showFallback;
+
+      if (window.SARURU && window.SARURU.ads) {
+        // 광고가 실제로 채워지면(iframe 삽입) 폴백 숨김 — 느린 fill 대비
+        if (ins && window.MutationObserver) {
+          new MutationObserver(function () {
+            if (ins.querySelector('iframe')) hideFallback();
+          }).observe(ins, { childList: true, subtree: true });
+        }
+        var _ad = document.createElement('script');
+        _ad.type = 'text/javascript';
+        _ad.src = '//t1.kakaocdn.net/kas/static/ba.min.js'; _ad.async = true;
+        document.body.appendChild(_ad);
+        // 백업: onfail 미발화 대비 — 4초 내 광고 iframe 없으면 폴백 노출
+        setTimeout(function () {
+          if (!ins || !ins.querySelector('iframe')) showFallback();
+        }, 4000);
+      } else if (slot) {
+        slot.style.display = 'none'; // dev: 광고·폴백 모두 숨김
+      }
+    })();
+  </script>
+
+  <!-- PWA 서비스워커: 스냅샷 아카이브에선 미등록(아카이브 경로 캐시 오염 방지). 루트 최종본에만 등록. -->
+
+</body>
+</html>
