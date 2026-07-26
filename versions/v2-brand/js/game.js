@@ -11,7 +11,7 @@
   const PLAYER_Y = H - GROUND - 4;
 
   // 브랜드 색
-  const NAVY = '#385088';
+  const NAVY = '#2D4B82';
   const NAVY_DEEP = '#2b3d68';
   const CREAM = '#fffdf6';
   const MILKW = '#ffffff';

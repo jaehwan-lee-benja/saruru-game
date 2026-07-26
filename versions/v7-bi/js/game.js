@@ -5,7 +5,7 @@
  *   그대로 이식했다. 좌표·팔레트·셰이딩 램프를 바꾸면 BI와 어긋난다 — 변경은 BI 원본 먼저.
  * 모자 3종(우유팩·소프트콘·스쿱) = BI 마스코트 라인업 → 캐릭터 선택 + 낙하 아이템 모티프.
  * 애니메이션 = BI 확정 스펙(눈깜박 + 모자 둥둥 3초 주기 1회 왕복).
- * 팔레트/그래픽 문법 = BI(NAVY #385088 · DEEP INK #26365e · SKY #bcccea · CREAM #fff6e6 · STRAWBERRY).
+ * 팔레트/그래픽 문법 = BI(NAVY #2D4B82 · DEEP INK #26365e · SKY #bcccea · CREAM #fff6e6 · STRAWBERRY).
  *
  * 로그인/DB 없이 로컬 플레이. 랭킹·인증은 M2. (최고점 = localStorage)
  */
@@ -113,7 +113,7 @@
   // BI 확정 팔레트 (원페이저 facePal과 동일)
   const PAL = {
     '.': null,
-    X: '#1c2748', D: '#26365e', d: '#385088', L: '#5a72aa',   // 잉크·네이비
+    X: '#1c2748', D: '#26365e', d: '#2D4B82', L: '#5a72aa',   // 잉크·네이비
     W: '#ffffff', e: '#eff4fc', s: '#d6e0f1', S: '#bcccea',   // 흰·스카이 그림자 램프
     N: '#3f5896', n: '#2a3d6e',                                // 젖소 무늬 네이비
     c: '#fff6e6', y: '#f3e6c6', Y: '#e2cfa4',                  // 크림 램프
@@ -700,7 +700,7 @@
         if (it.good) {
           score += it.points;
           const t = it.tier;
-          addPopup(cx, PLAYER_Y - 48, '+' + it.points, t ? '#e07d94' : '#385088', t >= 1);
+          addPopup(cx, PLAYER_Y - 48, '+' + it.points, t ? '#e07d94' : '#2D4B82', t >= 1);
           burst(cx, cy, it.glow || '#ffffff', 6 + t * 10, 0.8 + t * 0.8);
           burst(cx, cy, '#ffffff', 3 + t * 5, 0.5);
           flash(it.glow, 0.10 + t * 0.12);
@@ -805,7 +805,7 @@
     // 접지 그림자 — 3단 타원형(홉 높이만큼 작아짐)
     const sw = 12 - hop;
     ctx.globalAlpha = 0.13;
-    ctx.fillStyle = '#385088';
+    ctx.fillStyle = '#2D4B82';
     ctx.fillRect(Math.round(player.x) - sw, PLAYER_Y - 2, sw * 2, 1);
     ctx.fillRect(Math.round(player.x) - sw + 2, PLAYER_Y - 3, sw * 2 - 4, 3);
     ctx.globalAlpha = 1;
