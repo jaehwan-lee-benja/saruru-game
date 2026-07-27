@@ -244,6 +244,13 @@ html, body {
   transition: opacity 0.15s steps(2);
 }
 .overlay.hidden { opacity: 0; pointer-events: none; }
+
+/* ---- 로그인 게이트 — 미로그인 시 웰컴만 노출(카카오/구글 로그인 필수) ----
+   웰컴 오버레이를 불투명 처리해 뒤의 게임 캔버스가 안 보이게 하고,
+   게임 HUD·컨트롤 패드도 숨겨 '웰컴만' 화면이 되게 한다. 로그인 성공(=body.gated 해제) 시 복원. */
+#overlay-welcome { background: var(--ink); }              /* 불투명 게이트 — 캔버스 완전 가림 */
+body.gated .hud,
+body.gated #pad { visibility: hidden; }                   /* 게임 조작/점수 UI 숨김 */
 .card {
   background: var(--cream);
   border: 4px solid var(--ink);

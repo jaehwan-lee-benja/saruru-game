@@ -434,18 +434,22 @@
       if (col) { wx.fillStyle = col; wx.fillRect(c, r, 1, 1); }
     }
   }
-  function lockGame() {   // 미로그인: 웰컴만 노출, 나머지 오버레이 숨김, 진행 중이면 중단
+  function lockGame() {   // 미로그인: 웰컴만 노출(게임 캔버스·HUD·패드 숨김), 진행 중이면 중단
     state = 'locked';
     items = []; sparks = [];
+    document.body.classList.add('gated');   // 게임 화면 가림 — 로그인 성공 전엔 안 보이게
     if (el.welcome) el.welcome.classList.remove('hidden');
     el.start.classList.add('hidden');
     el.over.classList.add('hidden');
     if (el.pause) el.pause.classList.add('hidden');
   }
-  function unlockGame() { // 로그인: 웰컴 닫고 시작 화면으로
+  function unlockGame() { // 로그인: 웰컴 닫고 게임 노출 + 시작 화면으로
+    document.body.classList.remove('gated');
     if (el.welcome) el.welcome.classList.add('hidden');
     if (state === 'locked') { state = 'ready'; el.start.classList.remove('hidden'); }
   }
+  // 기본값=게이트(웰컴만). 로그인 확인되면 unlock — 미로그인 시 게임이 잠깐도 안 비치게.
+  document.body.classList.add('gated');
   if (window.SaruruAuth) {
     SaruruAuth.onAuth(function (s) { if (s.user) unlockGame(); else lockGame(); });
   } else {
