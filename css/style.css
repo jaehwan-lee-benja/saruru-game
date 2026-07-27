@@ -218,7 +218,11 @@ html, body {
    260px = 상단바+HUD+컨트롤패드+푸터+여백이 쓰는 세로. 224/336 = 0.667(가로/세로 비). */
 .canvas-frame {
   position: relative;
-  width: min(100%, 384px, calc((100dvh - 260px) * 0.667));
+  /* #4 스크롤 리사이즈 방지: dvh(스크롤 시 툴바 접힘으로 값이 변해 캔버스가 커졌다 작아졌다) →
+     svh(가장 작은 뷰포트 고정값)로 교체 → 스크롤/뷰포트 변화에 흔들리지 않는다.
+     #3 광고 노출: 여유공간 260→300px로 늘려 게임 아래 광고 배너가 화면 안에 들어오게. */
+  width: min(100%, 384px, calc((100vh - 330px) * 0.667));   /* 폴백(구브라우저) */
+  width: min(100%, 384px, calc((100svh - 330px) * 0.667));  /* svh 지원 시 우선 */
   aspect-ratio: 224 / 336;
   border: 4px solid var(--ink);
   box-shadow: 6px 6px 0 var(--sky);
@@ -488,7 +492,9 @@ body.gated #pad { visibility: hidden; }                   /* 게임 조작/점�
 }
 .biz-info {
   display: block;
-  margin-top: 10px;
+  text-align: center;         /* #5 최하단 독립 배치 — 가운데 정렬 */
+  margin: 16px auto 4px;
+  max-width: 360px;
   font-size: 10px;
   line-height: 1.7;
   letter-spacing: .2px;

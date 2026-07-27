@@ -701,8 +701,13 @@
       it.sway += 0.08 * f;
       const cx = it.x + it.w / 2 + Math.sin(it.sway) * it.swayA;
       const cy = it.y + it.h / 2;
-      // 얼굴 마크(머리)와 충돌
-      if (cy > PLAYER_Y - 34 && cy < PLAYER_Y + 2 && Math.abs(cx - player.x) < player.w / 2 + it.w / 2 - 3) {
+      // 얼굴 마크(머리)와 충돌 — 히트박스 정밀화(#1·#2)
+      //  · 똥(죽음): 실제 덩어리에 닿을 때만 — 캐릭터/똥 여백 제거 + 회피 여유↑
+      //  · 우유·아이스크림(획득): 기존처럼 관대하게(모으는 재미 유지)
+      const reach = it.good
+        ? (player.w / 2 + it.w / 2 - 3)
+        : (player.w * 0.30 + it.w * 0.26);
+      if (cy > PLAYER_Y - 34 && cy < PLAYER_Y + 2 && Math.abs(cx - player.x) < reach) {
         if (it.good) {
           score += it.points;
           const t = it.tier;
