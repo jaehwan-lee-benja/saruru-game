@@ -42,7 +42,7 @@
   <meta name="application-name" content="똥피하기" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css" />
-  <link rel="stylesheet" href="./css/style.css?v=20260727q" />
+  <link rel="stylesheet" href="./css/style.css?v=20260728c" />
 </head>
 <body>
   <div id="app">
@@ -69,8 +69,16 @@
       <div class="canvas-frame">
         <canvas id="game" width="224" height="336"></canvas>
 
-        <!-- 웰컴/로그인 화면 (미로그인 시 · 사르르 놀이동산 브랜드) -->
+        <!-- 웰컴/로그인 화면 (미로그인 시 · 사르르 놀이동산 브랜드) — 전체화면 커버 + 은은한 픽셀 배경 애니 -->
         <div id="overlay-welcome" class="overlay">
+          <div class="welcome-bg" aria-hidden="true">
+            <span class="wf-float wf1">🥛</span>
+            <span class="wf-float wf2">🍦</span>
+            <span class="wf-float wf3">🐄</span>
+            <span class="wf-float wf4">✨</span>
+            <span class="wf-float wf5">🥛</span>
+            <span class="wf-float wf6">✨</span>
+          </div>
           <div class="card welcome-card">
             <canvas id="welcome-face" width="40" height="42" class="welcome-face"></canvas>
             <h1 class="welcome-title"><span class="wm-a">사르르</span><br /><span class="wm-b">놀이동산</span></h1>
