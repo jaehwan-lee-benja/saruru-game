@@ -128,11 +128,21 @@
     if (_ready) { try { cb({ user: _user, player: _player, needsNickname: !!_user && !_player }); } catch (e) {} }
   }
 
+  // 로그인 후 반드시 "게임 페이지"로 복귀시킬 정규 redirect URL.
+  //  · index.html·쿼리·해시를 제거한 디렉터리 URL로 정규화 → Supabase Redirect URLs
+  //    허용목록(예: https://jaehwan-lee-benja.github.io/saruru-game/** )과 매칭 극대화.
+  //  · ⚠ 이 URL이 Supabase Auth의 Redirect URLs 허용목록에 없으면, Supabase가 이 값을
+  //    무시하고 Site URL(공유 프로젝트 기본)로 보내 다른 앱(warroom 등)으로 튕긴다.
+  //    → 허용목록에 게임 URL 등록이 필수(대시보드 작업).
+  function _gameRedirect() {
+    return window.location.origin + window.location.pathname.replace(/index\.html?$/i, "");
+  }
+
   // ---- Kakao 로그인 -------------------------------------------------------
   async function loginKakao() {
     if (!client) { console.warn("[SaruruAuth] 미초기화"); return { ok: false, error: "not_ready" }; }
-    // redirectTo: 로그인 후 현재 게임 페이지로 복귀(쿼리 제거한 깔끔한 URL).
-    const redirectTo = window.location.origin + window.location.pathname;
+    // redirectTo: 로그인 후 현재 게임 페이지로 복귀(index.html·쿼리·해시 제거한 정규 URL).
+    const redirectTo = _gameRedirect();
     try {
       const { error } = await client.auth.signInWithOAuth({
         provider: "kakao",
@@ -153,7 +163,7 @@
   // 별도 동의항목/검수 없이 바로 된다. redirectTo만 지정.
   async function loginGoogle() {
     if (!client) { console.warn("[SaruruAuth] 미초기화"); return { ok: false, error: "not_ready" }; }
-    const redirectTo = window.location.origin + window.location.pathname;
+    const redirectTo = _gameRedirect();
     try {
       const { error } = await client.auth.signInWithOAuth({
         provider: "google",
